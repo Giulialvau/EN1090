@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 /** Stesso algoritmo di `UsersService` / login: bcryptjs, cost factor 10 */
 async function main() {
-  const passwordPlain = 'admin123';
+  const passwordPlain = 'admin';
   const passwordHash = await bcrypt.hash(passwordPlain, 10);
 
   await prisma.user.upsert({

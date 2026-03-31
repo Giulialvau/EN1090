@@ -24,7 +24,9 @@ import { WpsModule } from './wps/wps.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      // In produzione (Railway) le variabili arrivano dall'ambiente.
+      // In locale continuiamo a supportare `.env`.
+      envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
       validate,
     }),
     PrismaModule,

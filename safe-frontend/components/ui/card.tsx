@@ -33,7 +33,9 @@ export function Card({
               </p>
             ) : null}
           </div>
-          {actions ? <div className="flex shrink-0 gap-2">{actions}</div> : null}
+          {actions ? (
+            <div className="flex shrink-0 gap-2">{actions}</div>
+          ) : null}
         </div>
       )}
       <div className="px-5 py-4">{children}</div>

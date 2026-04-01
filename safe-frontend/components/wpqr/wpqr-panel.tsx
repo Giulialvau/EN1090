@@ -6,7 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Table, type Column } from "@/components/ui/table";
-import { commesseApi, qualificheApi, wpqrApi, wpsApi } from "@/lib/api/endpoints";
+import {
+  commesseApi,
+  qualificheApi,
+  wpqrApi,
+  wpsApi,
+} from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { extractObject } from "@/lib/api/extract-object";
 import { formatDate } from "@/lib/format";
@@ -46,7 +51,7 @@ function toInputDate(iso: string | undefined | null): string {
 function commessaIdFromWpqr(w: Wpqr | null): string {
   if (!w) return "";
   return String(
-    w.commessaId ?? (w as { commessa_id?: string }).commessa_id ?? ""
+    w.commessaId ?? (w as { commessa_id?: string }).commessa_id ?? "",
   ).trim();
 }
 
@@ -79,7 +84,7 @@ export function WpqrPanel({
   const [form, setForm] = useState(emptyForm);
 
   const effectiveCommessaId =
-    scope === "commessa" ? commessaId ?? "" : form.commessaId;
+    scope === "commessa" ? (commessaId ?? "") : form.commessaId;
 
   const loadRows = useCallback(async () => {
     setError(null);
@@ -92,7 +97,11 @@ export function WpqrPanel({
     try {
       if (scope === "commessa" && commessaId) {
         setRows(await wpqrApi.byCommessa(commessaId));
-      } else if (scope === "global" && applyUrlCommessaFilter && urlCommessaFilter) {
+      } else if (
+        scope === "global" &&
+        applyUrlCommessaFilter &&
+        urlCommessaFilter
+      ) {
         setRows(await wpqrApi.byCommessa(urlCommessaFilter));
       } else if (scope === "global") {
         setRows(await wpqrApi.list());
@@ -104,7 +113,13 @@ export function WpqrPanel({
     } finally {
       setLoading(false);
     }
-  }, [scope, commessaId, applyUrlCommessaFilter, urlCommessaFilter, skipGlobalFetch]);
+  }, [
+    scope,
+    commessaId,
+    applyUrlCommessaFilter,
+    urlCommessaFilter,
+    skipGlobalFetch,
+  ]);
 
   useEffect(() => {
     void loadRows();
@@ -181,7 +196,7 @@ export function WpqrPanel({
       wpsId: String(r.wpsId ?? ""),
       dataQualifica: toInputDate(
         (r.dataQualifica as string | undefined) ??
-          (r.data_qualifica as string | undefined)
+          (r.data_qualifica as string | undefined),
       ),
       scadenza: toInputDate(r.scadenza as string | undefined),
       note: String(r.note ?? ""),
@@ -228,8 +243,7 @@ export function WpqrPanel({
         ? await wpqrApi.update(editingId, body)
         : await wpqrApi.create(body);
       const saved = extractObject<Wpqr>(raw);
-      const resolvedCommessaId =
-        commessaIdFromWpqr(saved) || cid;
+      const resolvedCommessaId = commessaIdFromWpqr(saved) || cid;
       setModalOpen(false);
       if (
         scope === "global" &&
@@ -238,14 +252,14 @@ export function WpqrPanel({
         resolvedCommessaId
       ) {
         router.replace(
-          `/wpqr?commessaId=${encodeURIComponent(resolvedCommessaId)}`
+          `/wpqr?commessaId=${encodeURIComponent(resolvedCommessaId)}`,
         );
       } else {
         await loadRows();
       }
     } catch (err) {
       setSaveError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -260,7 +274,7 @@ export function WpqrPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -301,7 +315,7 @@ export function WpqrPanel({
       render: (r) =>
         formatDate(
           (r.dataQualifica as string | undefined) ??
-            (r.data_qualifica as string | undefined)
+            (r.data_qualifica as string | undefined),
         ) || "—",
     },
     {
@@ -443,7 +457,9 @@ export function WpqrPanel({
       >
         <form id="form-wpqr" className="space-y-3" onSubmit={save}>
           {saveError ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {saveError}
+            </p>
           ) : null}
           {scope === "global" ? (
             <div className="flex flex-col gap-1.5">

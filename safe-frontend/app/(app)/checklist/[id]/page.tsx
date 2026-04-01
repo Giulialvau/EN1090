@@ -7,10 +7,7 @@ import { UploadDocument } from "@/components/ui/upload-document";
 import { checklistApi, documentiApi } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { formatDate } from "@/lib/format";
-import {
-  CHECKLIST_ESITI as ESITI,
-  CHECKLIST_STATI as STATI,
-} from "../form";
+import { CHECKLIST_ESITI as ESITI, CHECKLIST_STATI as STATI } from "../form";
 import type {
   Checklist,
   ChecklistAllegatoRef,
@@ -96,13 +93,13 @@ export default function ChecklistDetailPage() {
       setEsito(c.esito ? String(c.esito) : "");
       setOperatore(String(c.operatore ?? ""));
       setNote(String(c.note ?? ""));
-      setDataCompilazione(toInputDateTime(c.dataCompilazione as string | undefined));
+      setDataCompilazione(
+        toInputDateTime(c.dataCompilazione as string | undefined),
+      );
       const els = parseElementi(c.elementi);
       setElementi(els.length ? els : []);
     } catch (e) {
-      setError(
-        e instanceof ApiError ? e.message : "Checklist non trovata"
-      );
+      setError(e instanceof ApiError ? e.message : "Checklist non trovata");
       setRow(null);
     } finally {
       setLoading(false);
@@ -115,7 +112,7 @@ export default function ChecklistDetailPage() {
 
   function updateEl(i: number, patch: Partial<ElRow>) {
     setElementi((prev) =>
-      prev.map((r, j) => (j === i ? { ...r, ...patch } : r))
+      prev.map((r, j) => (j === i ? { ...r, ...patch } : r)),
     );
   }
 
@@ -150,7 +147,7 @@ export default function ChecklistDetailPage() {
       await load();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -166,7 +163,7 @@ export default function ChecklistDetailPage() {
       router.replace("/checklist");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -240,7 +237,11 @@ export default function ChecklistDetailPage() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="secondary" onClick={() => void remove()}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => void remove()}
+          >
             Elimina
           </Button>
         </div>
@@ -318,8 +319,8 @@ export default function ChecklistDetailPage() {
         description="Evidenze visive e accettazione (EN 1090 — registrazione fase)"
       >
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Carica foto o scansione firma come documento di commessa; il collegamento
-          viene salvato negli allegati della checklist.
+          Carica foto o scansione firma come documento di commessa; il
+          collegamento viene salvato negli allegati della checklist.
         </p>
         {commessaId ? (
           <div className="mt-4">
@@ -345,7 +346,10 @@ export default function ChecklistDetailPage() {
         )}
       </Card>
 
-      <Card title="Dati e punti controllo" description="Salvataggio con PATCH /checklist/:id">
+      <Card
+        title="Dati e punti controllo"
+        description="Salvataggio con PATCH /checklist/:id"
+      >
         <form className="space-y-4" onSubmit={save}>
           <div className="grid gap-3 sm:grid-cols-2">
             <Input
@@ -421,7 +425,9 @@ export default function ChecklistDetailPage() {
           </div>
 
           <div className="border-t border-zinc-100 pt-4 dark:border-zinc-800">
-            <p className="mb-2 text-sm font-medium">Elementi (domande / risposte)</p>
+            <p className="mb-2 text-sm font-medium">
+              Elementi (domande / risposte)
+            </p>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
@@ -463,7 +469,9 @@ export default function ChecklistDetailPage() {
                           className="w-full min-w-[100px] rounded border border-zinc-300 bg-white px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-950"
                           rows={2}
                           value={el.note}
-                          onChange={(e) => updateEl(i, { note: e.target.value })}
+                          onChange={(e) =>
+                            updateEl(i, { note: e.target.value })
+                          }
                         />
                       </td>
                       <td className="py-2 align-top">

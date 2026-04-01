@@ -28,7 +28,9 @@ export function StatCard({ label, value, hint, icon, href }: StatCardProps) {
           {value}
         </p>
         {hint ? (
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            {hint}
+          </p>
         ) : null}
         {href ? (
           <p className="mt-2 text-xs font-medium text-sky-700 dark:text-sky-400">

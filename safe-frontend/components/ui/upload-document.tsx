@@ -75,7 +75,9 @@ export function UploadDocument({
           versione,
         });
         const id = String(doc.id);
-        const nome = String(doc.nome ?? (doc as { titolo?: string }).titolo ?? resolvedTitle);
+        const nome = String(
+          doc.nome ?? (doc as { titolo?: string }).titolo ?? resolvedTitle,
+        );
         onSuccess?.({
           id,
           nome,
@@ -87,7 +89,7 @@ export function UploadDocument({
         onError?.(
           err instanceof ApiError
             ? err.message
-            : "Upload non riuscito. Riprova."
+            : "Upload non riuscito. Riprova.",
         );
       } finally {
         setUploading(false);
@@ -102,7 +104,7 @@ export function UploadDocument({
       tipo,
       title,
       versione,
-    ]
+    ],
   );
 
   return (

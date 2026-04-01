@@ -29,11 +29,7 @@ type Props = {
   showStato?: boolean;
 };
 
-export function CommessaFormFields({
-  form,
-  setForm,
-  showStato = true,
-}: Props) {
+export function CommessaFormFields({ form, setForm, showStato = true }: Props) {
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-2">

@@ -70,7 +70,7 @@ export function WpsPanel({
   const [form, setForm] = useState(emptyForm);
 
   const effectiveCommessaId =
-    scope === "commessa" ? commessaId ?? "" : form.commessaId;
+    scope === "commessa" ? (commessaId ?? "") : form.commessaId;
 
   const loadRows = useCallback(async () => {
     setError(null);
@@ -83,7 +83,11 @@ export function WpsPanel({
     try {
       if (scope === "commessa" && commessaId) {
         setRows(await wpsApi.byCommessa(commessaId));
-      } else if (scope === "global" && applyUrlCommessaFilter && urlCommessaFilter) {
+      } else if (
+        scope === "global" &&
+        applyUrlCommessaFilter &&
+        urlCommessaFilter
+      ) {
         setRows(await wpsApi.byCommessa(urlCommessaFilter));
       } else if (scope === "global") {
         setRows(await wpsApi.list());
@@ -95,7 +99,13 @@ export function WpsPanel({
     } finally {
       setLoading(false);
     }
-  }, [scope, commessaId, applyUrlCommessaFilter, urlCommessaFilter, skipGlobalFetch]);
+  }, [
+    scope,
+    commessaId,
+    applyUrlCommessaFilter,
+    urlCommessaFilter,
+    skipGlobalFetch,
+  ]);
 
   useEffect(() => {
     void loadRows();
@@ -206,14 +216,14 @@ export function WpsPanel({
         commessaIdForUrl
       ) {
         router.replace(
-          `/wps?commessaId=${encodeURIComponent(commessaIdForUrl)}`
+          `/wps?commessaId=${encodeURIComponent(commessaIdForUrl)}`,
         );
       } else {
         await loadRows();
       }
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -228,7 +238,7 @@ export function WpsPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }

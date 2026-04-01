@@ -2,10 +2,12 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateAttrezzaturaDto } from './dto/create-attrezzatura.dto';
-import { UpdateAttrezzaturaDto } from './dto/update-attrezzatura.dto';
+} from "@nestjs/common";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateAttrezzaturaDto } from "./dto/create-attrezzatura.dto";
+import { UpdateAttrezzaturaDto } from "./dto/update-attrezzatura.dto";
 
 @Injectable()
 export class AttrezzatureService {
@@ -22,10 +24,10 @@ export class AttrezzatureService {
   }
 
   findAll() {
-    return this.prisma.attrezzatura.findMany({ orderBy: { nome: 'asc' } });
+    return this.prisma.attrezzatura.findMany({ orderBy: { nome: "asc" } });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.attrezzatura.findUnique({ where: { id } });
     if (!row) {
       throw new NotFoundException(`Attrezzatura ${id} non trovata`);
@@ -33,7 +35,7 @@ export class AttrezzatureService {
     return row;
   }
 
-  async update(id: string, dto: UpdateAttrezzaturaDto) {
+  async update(id: number, dto: UpdateAttrezzaturaDto) {
     await this.ensureExists(id);
     if (dto.matricola) {
       const clash = await this.prisma.attrezzatura.findFirst({
@@ -46,13 +48,13 @@ export class AttrezzatureService {
     return this.prisma.attrezzatura.update({ where: { id }, data: dto });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.attrezzatura.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number): Promise<void> {
     const a = await this.prisma.attrezzatura.findUnique({ where: { id } });
     if (!a) {
       throw new NotFoundException(`Attrezzatura ${id} non trovata`);

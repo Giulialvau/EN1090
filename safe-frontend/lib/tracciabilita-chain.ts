@@ -16,7 +16,7 @@ export function materialeKeyFromRecord(r: TracciabilitaRecord): string {
 
 export function lottoLabel(
   r: TracciabilitaRecord,
-  mat?: { lotto?: string | null }
+  mat?: { lotto?: string | null },
 ): string {
   const l = r.lotto ?? r.materiale?.lotto ?? mat?.lotto;
   return l != null && String(l).trim() !== "" ? String(l) : "—";
@@ -24,7 +24,7 @@ export function lottoLabel(
 
 /** Raggruppa record per materiale (ID o fallback codice+lotto). */
 export function groupTracciabilitaByMateriale(
-  rows: TracciabilitaRecord[]
+  rows: TracciabilitaRecord[],
 ): Map<string, TracciabilitaRecord[]> {
   const map = new Map<string, TracciabilitaRecord[]>();
   for (const r of rows) {
@@ -45,9 +45,7 @@ export function uniqueLottiFromMateriali(materiali: Materiale[]): string[] {
   return [...s].sort();
 }
 
-export function materialeRef(
-  m: Materiale
-): MaterialeRef & { id: string } {
+export function materialeRef(m: Materiale): MaterialeRef & { id: string } {
   return {
     id: String(m.id),
     codice: String(m.codice ?? ""),

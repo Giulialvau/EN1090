@@ -63,10 +63,7 @@ export function TracciabilitaTable({
         return (
           <span>
             <span className="font-medium">{String(m?.codice ?? "—")}</span>
-            <span className="text-zinc-500">
-              {" "}
-              · lotto {lottoLabel(r)}
-            </span>
+            <span className="text-zinc-500"> · lotto {lottoLabel(r)}</span>
             {m?.descrizione ? (
               <span className="block text-xs text-zinc-500">
                 {m.descrizione}
@@ -84,9 +81,7 @@ export function TracciabilitaTable({
           className="font-medium text-sky-700 hover:underline dark:text-sky-400"
           href={`/tracciabilita/record/${r.id}`}
         >
-          {String(
-            r.descrizioneComponente ?? r.descrizione_componente ?? "—"
-          )}
+          {String(r.descrizioneComponente ?? r.descrizione_componente ?? "—")}
         </Link>
       ),
     },

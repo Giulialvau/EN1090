@@ -15,18 +15,21 @@ export function useAuth() {
   const accessToken = useSyncExternalStore(
     subscribeAuth,
     () => getToken(),
-    () => null
+    () => null,
   );
 
   const refreshToken = useSyncExternalStore(
     subscribeAuth,
     () => getRefreshToken(),
-    () => null
+    () => null,
   );
 
-  const login = useCallback((params: { accessToken: string; refreshToken?: string | null }) => {
-    setTokens(params);
-  }, []);
+  const login = useCallback(
+    (params: { accessToken: string; refreshToken?: string | null }) => {
+      setTokens(params);
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     clearToken();

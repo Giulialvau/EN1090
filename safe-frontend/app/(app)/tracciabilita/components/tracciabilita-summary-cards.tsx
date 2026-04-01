@@ -27,7 +27,7 @@ export function TracciabilitaSummaryCards({
             tracciabilita
               .map((r) => r.materiale?.lotto ?? r.lotto)
               .filter((x): x is string => x != null && String(x).trim() !== "")
-              .map((x) => String(x).trim())
+              .map((x) => String(x).trim()),
           ),
         ].sort();
 
@@ -42,9 +42,9 @@ export function TracciabilitaSummaryCards({
         r.descrizioneComponente ??
           r.descrizione_componente ??
           r.posizione ??
-          r.id
-      ).trim()
-    )
+          r.id,
+      ).trim(),
+    ),
   ).size;
 
   const items = [
@@ -60,9 +60,7 @@ export function TracciabilitaSummaryCards({
       label: "Lotti distinti",
       value: String(lotti.length),
       hint:
-        materiali.length > 0
-          ? "Da tabella materiali"
-          : "Da dati tracciabilità",
+        materiali.length > 0 ? "Da tabella materiali" : "Da dati tracciabilità",
     },
     {
       label: "Collegamenti tracciabilità",
@@ -84,7 +82,9 @@ export function TracciabilitaSummaryCards({
             {it.value}
           </p>
           {commessaCodice ? (
-            <p className="mt-1 text-xs text-zinc-500">Commessa {commessaCodice}</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Commessa {commessaCodice}
+            </p>
           ) : null}
         </Card>
       ))}

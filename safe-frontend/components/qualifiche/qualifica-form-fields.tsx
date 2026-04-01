@@ -46,9 +46,7 @@ export function QualificaFormFields({ form, setForm }: Props) {
       <Input
         label="Riferimento documento (testo)"
         value={form.documento}
-        onChange={(e) =>
-          setForm((f) => ({ ...f, documento: e.target.value }))
-        }
+        onChange={(e) => setForm((f) => ({ ...f, documento: e.target.value }))}
       />
     </>
   );

@@ -87,7 +87,7 @@ function DocumentiPageInner() {
       setMateriali(m);
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento documenti"
+        e instanceof ApiError ? e.message : "Errore caricamento documenti",
       );
     } finally {
       setLoading(false);
@@ -131,12 +131,12 @@ function DocumentiPageInner() {
     let r = rows;
     if (filterTipo !== "tutti") {
       r = r.filter(
-        (x) => String(x.tipo ?? "").toLowerCase() === filterTipo.toLowerCase()
+        (x) => String(x.tipo ?? "").toLowerCase() === filterTipo.toLowerCase(),
       );
     }
     if (filterCommessa) {
       r = r.filter(
-        (x) => String(x.commessaId ?? x.commessa_id) === filterCommessa
+        (x) => String(x.commessaId ?? x.commessa_id) === filterCommessa,
       );
     }
     if (filterMateriale) {
@@ -152,23 +152,16 @@ function DocumentiPageInner() {
     if (q) {
       r = r.filter((d) => {
         const nome = String(d.nome ?? d.titolo ?? "").toLowerCase();
-        const comm = (
-          d.commessa as { codice?: string; cliente?: string } | undefined
-        );
+        const comm = d.commessa as
+          | { codice?: string; cliente?: string }
+          | undefined;
         const cod = String(comm?.codice ?? "").toLowerCase();
         const cl = String(comm?.cliente ?? "").toLowerCase();
         return nome.includes(q) || cod.includes(q) || cl.includes(q);
       });
     }
     return r;
-  }, [
-    rows,
-    filterTipo,
-    filterCommessa,
-    filterMateriale,
-    materiali,
-    search,
-  ]);
+  }, [rows, filterTipo, filterCommessa, filterMateriale, materiali, search]);
 
   const { queryCommessaId, filteredRows } =
     useCommessaIdFilter(filteredByControls);
@@ -182,7 +175,7 @@ function DocumentiPageInner() {
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Impossibile aprire il file."
+        err instanceof ApiError ? err.message : "Impossibile aprire il file.",
       );
     } finally {
       setFileOpeningId(null);
@@ -206,8 +199,7 @@ function DocumentiPageInner() {
       key: "tipo",
       header: "Tipo / categoria",
       render: (r) =>
-        TIPI_LABEL[String(r.tipo)] ??
-        String(r.tipo ?? r.categoria ?? "—"),
+        TIPI_LABEL[String(r.tipo)] ?? String(r.tipo ?? r.categoria ?? "—"),
     },
     {
       key: "versione",
@@ -218,9 +210,7 @@ function DocumentiPageInner() {
       key: "stato",
       header: "Approvazione",
       render: (r) =>
-        String(
-          r.statoApprovazione ?? r.stato_approvazione ?? r.stato ?? "—"
-        ),
+        String(r.statoApprovazione ?? r.stato_approvazione ?? r.stato ?? "—"),
     },
     {
       key: "scadenza",
@@ -228,7 +218,7 @@ function DocumentiPageInner() {
       render: (r) =>
         formatDate(
           (r.dataScadenza as string | undefined) ??
-            (r.data_scadenza as string | undefined)
+            (r.data_scadenza as string | undefined),
         ),
     },
     {
@@ -287,7 +277,9 @@ function DocumentiPageInner() {
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-zinc-500">Commessa</label>
+            <label className="text-xs font-medium text-zinc-500">
+              Commessa
+            </label>
             <select
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-950"
               value={filterCommessa}
@@ -328,9 +320,7 @@ function DocumentiPageInner() {
             />
           </div>
         </div>
-        {error ? (
-          <p className="mb-4 text-sm text-red-600">{error}</p>
-        ) : null}
+        {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
         <CommessaFilterBanner commessaId={queryCommessaId} />
         {!commessaFromUrl ? (
           <p className="text-sm text-zinc-500">
@@ -401,7 +391,9 @@ function DocumentiPageInner() {
             onError={(msg) => setUploadError(msg)}
           />
           {uploadError ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {uploadError}
+            </p>
           ) : null}
         </div>
       </Modal>

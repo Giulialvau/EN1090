@@ -135,7 +135,7 @@ export function CommessaDetailView({ id }: { id: string }) {
       });
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento commessa"
+        e instanceof ApiError ? e.message : "Errore caricamento commessa",
       );
     } finally {
       setLoading(false);
@@ -159,7 +159,7 @@ export function CommessaDetailView({ id }: { id: string }) {
       } catch (e) {
         if (!cancelled)
           setReportError(
-            e instanceof ApiError ? e.message : "Errore report commessa"
+            e instanceof ApiError ? e.message : "Errore report commessa",
           );
       } finally {
         if (!cancelled) setReportLoading(false);
@@ -206,7 +206,7 @@ export function CommessaDetailView({ id }: { id: string }) {
       void refreshPhases();
     } catch (err) {
       setSaveError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -214,7 +214,8 @@ export function CommessaDetailView({ id }: { id: string }) {
   }
 
   async function removeCommessa() {
-    if (!data || !window.confirm("Eliminare definitivamente questa commessa?")) return;
+    if (!data || !window.confirm("Eliminare definitivamente questa commessa?"))
+      return;
     setDeleting(true);
     setError(null);
     try {
@@ -222,7 +223,7 @@ export function CommessaDetailView({ id }: { id: string }) {
       router.replace("/commesse");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     } finally {
       setDeleting(false);
@@ -230,9 +231,7 @@ export function CommessaDetailView({ id }: { id: string }) {
   }
 
   if (loading && !data) {
-    return (
-      <p className="text-sm text-zinc-500">Caricamento commessa…</p>
-    );
+    return <p className="text-sm text-zinc-500">Caricamento commessa…</p>;
   }
 
   if (error && !data) {
@@ -354,42 +353,56 @@ export function CommessaDetailView({ id }: { id: string }) {
         <Card title="Anagrafica" description="Dati generali della commessa">
           <dl className="grid gap-3 sm:grid-cols-2">
             <div>
-              <dt className="text-xs font-medium uppercase text-zinc-500">Codice</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Codice
+              </dt>
               <dd className="text-sm">{String(data.codice ?? "—")}</dd>
             </div>
             <div>
-              <dt className="text-xs font-medium uppercase text-zinc-500">Stato</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Stato
+              </dt>
               <dd className="text-sm">{String(data.stato ?? "—")}</dd>
             </div>
             <div>
-              <dt className="text-xs font-medium uppercase text-zinc-500">Titolo</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Titolo
+              </dt>
               <dd className="text-sm">{String(data.titolo ?? "—")}</dd>
             </div>
             <div>
-              <dt className="text-xs font-medium uppercase text-zinc-500">Luogo</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Luogo
+              </dt>
               <dd className="text-sm">{String(data.luogo ?? "—")}</dd>
             </div>
             <div>
-              <dt className="text-xs font-medium uppercase text-zinc-500">Periodo</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Periodo
+              </dt>
               <dd className="text-sm">
                 {formatDate(data.dataInizio as string | undefined)} —{" "}
                 {formatDate(data.dataFine as string | undefined)}
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs font-medium uppercase text-zinc-500">Descrizione</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Descrizione
+              </dt>
               <dd className="text-sm">{String(data.descrizione ?? "—")}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs font-medium uppercase text-zinc-500">Note</dt>
+              <dt className="text-xs font-medium uppercase text-zinc-500">
+                Note
+              </dt>
               <dd className="whitespace-pre-wrap text-sm">
                 {String(data.note ?? "—")}
               </dd>
             </div>
           </dl>
           <p className="mt-4 text-xs text-zinc-500">
-            Piani di controllo e audit: schede dedicate; totali aggregati nel tab
-            Report.
+            Piani di controllo e audit: schede dedicate; totali aggregati nel
+            tab Report.
           </p>
           <div className="mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800">
             <p className="mb-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">
@@ -612,7 +625,9 @@ export function CommessaDetailView({ id }: { id: string }) {
       >
         <form id="edit-commessa" className="space-y-3" onSubmit={saveEdit}>
           {saveError ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {saveError}
+            </p>
           ) : null}
           <CommessaFormFields form={editForm} setForm={setEditForm} showStato />
         </form>
@@ -628,13 +643,7 @@ function toInputDate(iso: string | undefined): string {
   return d.toISOString().slice(0, 10);
 }
 
-function ModuloGlobaleLink({
-  href,
-  label,
-}: {
-  href: string;
-  label: string;
-}) {
+function ModuloGlobaleLink({ href, label }: { href: string; label: string }) {
   return (
     <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
       Modulo globale:{" "}

@@ -70,7 +70,7 @@ export default function TracciabilitaRecordPage() {
             row.descrizioneComponente ??
               row.descrizione_componente ??
               row.pezzo ??
-              "Record"
+              "Record",
           )}
         </h2>
       </div>
@@ -106,9 +106,7 @@ export default function TracciabilitaRecordPage() {
             </dt>
             <dd>
               {String(
-                row.descrizioneComponente ??
-                  row.descrizione_componente ??
-                  "—"
+                row.descrizioneComponente ?? row.descrizione_componente ?? "—",
               )}
             </dd>
           </div>
@@ -161,7 +159,9 @@ export default function TracciabilitaRecordPage() {
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium uppercase text-zinc-500">Note</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Note
+            </dt>
             <dd className="whitespace-pre-wrap">{String(row.note ?? "—")}</dd>
           </div>
         </dl>

@@ -52,7 +52,9 @@ export function CommessaWorkflowBar({
                 : `${n} NC apert${n === 1 ? "a" : "e"}`;
             }
             if (s.id === "overview") {
-              return done ? "Anagrafica completa" : "Completare codice e cliente";
+              return done
+                ? "Anagrafica completa"
+                : "Completare codice e cliente";
             }
             if (s.id === "wps-wpqr") {
               return `${n} record (WPS + WPQR)`;

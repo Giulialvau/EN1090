@@ -30,7 +30,7 @@ export function TracciabilitaPanel({
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<TracciabilitaRecord | null>(
-    null
+    null,
   );
 
   const loadRows = useCallback(async () => {
@@ -42,7 +42,7 @@ export function TracciabilitaPanel({
       }
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento tracciabilità"
+        e instanceof ApiError ? e.message : "Errore caricamento tracciabilità",
       );
     } finally {
       setLoading(false);
@@ -84,7 +84,7 @@ export function TracciabilitaPanel({
   async function removeRow(r: TracciabilitaRecord) {
     if (
       !window.confirm(
-        `Rimuovere la riga di tracciabilità (pos. ${r.posizione ?? r.id})?`
+        `Rimuovere la riga di tracciabilità (pos. ${r.posizione ?? r.id})?`,
       )
     )
       return;
@@ -94,7 +94,7 @@ export function TracciabilitaPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }

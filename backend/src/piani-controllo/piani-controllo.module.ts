@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
-import { PianiControlloController } from './piani-controllo.controller';
-import { PianiControlloService } from './piani-controllo.service';
+import { Module } from "@nestjs/common";
+
+import { PianiControlloController } from "./piani-controllo.controller";
+import { PianiControlloService } from "./piani-controllo.service";
 
 @Module({
   controllers: [PianiControlloController],

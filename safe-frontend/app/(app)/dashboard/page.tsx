@@ -85,7 +85,7 @@ const auditColumns: Column<Audit>[] = [
       formatDate(
         (r.dataProgrammata as string | undefined) ??
           (r.data_programmata as string | undefined) ??
-          (r.data as string | undefined)
+          (r.data as string | undefined),
       ),
   },
   { key: "esito", header: "Esito", render: (r) => String(r.esito ?? "—") },
@@ -112,7 +112,7 @@ const qualColumns: Column<Qualifica>[] = [
       formatDate(
         (r.scadenza as string | undefined) ??
           (r.dataScadenza as string | undefined) ??
-          (r.data_scadenza as string | undefined)
+          (r.data_scadenza as string | undefined),
       ) || "—",
   },
   { key: "ruolo", header: "Ruolo", render: (r) => String(r.ruolo ?? "—") },
@@ -189,7 +189,7 @@ export default function DashboardPage() {
       } catch (e) {
         if (!cancelled)
           setError(
-            e instanceof Error ? e.message : "Errore caricamento dashboard"
+            e instanceof Error ? e.message : "Errore caricamento dashboard",
           );
       } finally {
         if (!cancelled) setLoading(false);
@@ -344,7 +344,9 @@ export default function DashboardPage() {
       >
         <div className="flex flex-wrap gap-6">
           <div>
-            <p className="text-xs font-medium uppercase text-zinc-500">Attive</p>
+            <p className="text-xs font-medium uppercase text-zinc-500">
+              Attive
+            </p>
             <p className="text-3xl font-semibold tabular-nums text-sky-800 dark:text-sky-200">
               {data.commesseAttive}
             </p>

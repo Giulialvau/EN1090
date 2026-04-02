@@ -2,23 +2,27 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+} from "@nestjs/common";
+import { Prisma, User } from "@prisma/client";
+import * as bcrypt from "bcryptjs";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'passwordHash'>> {
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<Omit<User, "passwordHash">> {
     const existing = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
     });
     if (existing) {
-      throw new ConflictException('Email already in use');
+      throw new ConflictException("Email already in use");
     }
 
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
@@ -28,6 +32,7 @@ export class UsersService {
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
         role: createUserDto.role,
+        aziendaId: createUserDto.aziendaId,
         passwordHash,
       },
     });
@@ -35,15 +40,15 @@ export class UsersService {
     return this.excludeSensitive(user);
   }
 
-  async findAll(): Promise<Array<Omit<User, 'passwordHash'>>> {
+  async findAll(): Promise<Array<Omit<User, "passwordHash">>> {
     const users = await this.prisma.user.findMany();
     return users.map((user) => this.excludeSensitive(user));
   }
 
-  async findOne(id: string): Promise<Omit<User, 'passwordHash'>> {
+  async findOne(id: string): Promise<Omit<User, "passwordHash">> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
     return this.excludeSensitive(user);
   }
@@ -55,7 +60,7 @@ export class UsersService {
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<Omit<User, 'passwordHash'>> {
+  ): Promise<Omit<User, "passwordHash">> {
     await this.ensureExists(id);
 
     const data: Prisma.UserUpdateInput = {
@@ -83,8 +88,13 @@ export class UsersService {
     return { deleted: true };
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
-    const refreshTokenHash = refreshToken ? await bcrypt.hash(refreshToken, 10) : null;
+  async updateRefreshToken(
+    userId: string,
+    refreshToken: string | null,
+  ): Promise<void> {
+    const refreshTokenHash = refreshToken
+      ? await bcrypt.hash(refreshToken, 10)
+      : null;
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshTokenHash },
@@ -94,12 +104,12 @@ export class UsersService {
   private async ensureExists(id: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
   }
 
-  private excludeSensitive(user: User): Omit<User, 'passwordHash'> {
-    const { passwordHash, ...safeUser } = user;
+  private excludeSensitive(user: User): Omit<User, "passwordHash"> {
+    const { passwordHash: _passwordHash, ...safeUser } = user;
     return safeUser;
   }
 }

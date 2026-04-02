@@ -3,23 +3,25 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
-import { Commessa, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateCommessaDto } from './dto/create-commessa.dto';
-import { QueryCommessaDto } from './dto/query-commessa.dto';
-import { UpdateCommessaDto } from './dto/update-commessa.dto';
+} from "@nestjs/common";
+import { Commessa, Prisma } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateCommessaDto } from "./dto/create-commessa.dto";
+import { QueryCommessaDto } from "./dto/query-commessa.dto";
+import { UpdateCommessaDto } from "./dto/update-commessa.dto";
 
 /** Evita .trim su valori non-stringa (es. query duplicati → array) */
 function normalizeQueryString(v: unknown): string | undefined {
   if (v == null) return undefined;
-  if (typeof v === 'string') {
+  if (typeof v === "string") {
     const t = v.trim();
     return t.length ? t : undefined;
   }
   if (Array.isArray(v)) {
     const first = v[0];
-    if (typeof first === 'string') {
+    if (typeof first === "string") {
       const t = first.trim();
       return t.length ? t : undefined;
     }
@@ -28,13 +30,13 @@ function normalizeQueryString(v: unknown): string | undefined {
 }
 
 function parseDateBoundStart(s: unknown): Date | undefined {
-  if (typeof s !== 'string' || !s.trim()) return undefined;
+  if (typeof s !== "string" || !s.trim()) return undefined;
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
 function parseDateBoundEndInclusive(s: unknown): Date | undefined {
-  if (typeof s !== 'string' || !s.trim()) return undefined;
+  if (typeof s !== "string" || !s.trim()) return undefined;
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return undefined;
   d.setHours(23, 59, 59, 999);
@@ -49,10 +51,12 @@ const commessaIncludeFull = {
   audits: true,
   wps: true,
   wpqr: true,
-  checklists: true,
+  checklist: true,
   tracciabilita: {
     include: {
-      materiale: { select: { id: true, codice: true, lotto: true, descrizione: true } },
+      materiale: {
+        select: { id: true, codice: true, lotto: true, descrizione: true },
+      },
     },
   },
 } satisfies Prisma.CommessaInclude;
@@ -68,7 +72,9 @@ export class CommesseService {
       where: { codice: dto.codice },
     });
     if (exists) {
-      throw new ConflictException(`Commessa con codice ${dto.codice} già esistente`);
+      throw new ConflictException(
+        `Commessa con codice ${dto.codice} già esistente`,
+      );
     }
     return this.prisma.commessa.create({
       data: {
@@ -86,7 +92,9 @@ export class CommesseService {
     });
   }
 
-  private buildCommessaWhere(query?: QueryCommessaDto): Prisma.CommessaWhereInput {
+  private buildCommessaWhere(
+    query?: QueryCommessaDto,
+  ): Prisma.CommessaWhereInput {
     const where: Prisma.CommessaWhereInput = {};
 
     if (query?.stato) {
@@ -97,7 +105,7 @@ export class CommesseService {
     if (cliente) {
       where.cliente = {
         contains: cliente,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -121,18 +129,18 @@ export class CommesseService {
     try {
       return await this.prisma.commessa.findMany({
         where: this.buildCommessaWhere(query),
-        orderBy: { codice: 'asc' },
+        orderBy: { codice: "asc" },
       });
     } catch (err) {
       this.logger.error(
-        'commesse.findAll: operazione fallita',
+        "commesse.findAll: operazione fallita",
         err instanceof Error ? err.stack : err,
       );
       return [];
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.commessa.findUnique({
       where: { id },
       include: commessaIncludeFull,
@@ -143,7 +151,7 @@ export class CommesseService {
     return row;
   }
 
-  async update(id: string, dto: UpdateCommessaDto) {
+  async update(id: number, dto: UpdateCommessaDto) {
     await this.ensureExists(id);
     if (dto.codice) {
       const clash = await this.prisma.commessa.findFirst({
@@ -159,13 +167,13 @@ export class CommesseService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.commessa.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number): Promise<void> {
     const c = await this.prisma.commessa.findUnique({ where: { id } });
     if (!c) {
       throw new NotFoundException(`Commessa ${id} non trovata`);

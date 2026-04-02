@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { NcStato } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { NcStato } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class ReportService {
@@ -21,7 +22,7 @@ export class ReportService {
     ] = await Promise.all([
       this.prisma.commessa.count(),
       this.prisma.commessa.count({
-        where: { stato: { in: ['IN_CORSO', 'SOSPESA'] } },
+        where: { stato: { in: ["IN_CORSO", "SOSPESA"] } },
       }),
       this.prisma.materiale.count(),
       this.prisma.documento.count(),
@@ -32,7 +33,7 @@ export class ReportService {
         where: { stato: NcStato.CHIUSA },
       }),
       this.prisma.audit.count(),
-      this.prisma.audit.count({ where: { esito: 'NON_CONFORME' } }),
+      this.prisma.audit.count({ where: { esito: "NON_CONFORME" } }),
       this.prisma.wps.count(),
       this.prisma.wpqr.count({
         where: {
@@ -46,7 +47,7 @@ export class ReportService {
 
     const ultimeNc = await this.prisma.nonConformita.findMany({
       take: 5,
-      orderBy: { dataApertura: 'desc' },
+      orderBy: { dataApertura: "desc" },
       include: {
         commessa: { select: { codice: true, cliente: true } },
       },
@@ -54,7 +55,7 @@ export class ReportService {
 
     const ultimiAudit = await this.prisma.audit.findMany({
       take: 5,
-      orderBy: { data: 'desc' },
+      orderBy: { data: "desc" },
       include: {
         commessa: { select: { codice: true, cliente: true } },
       },
@@ -79,7 +80,7 @@ export class ReportService {
     };
   }
 
-  async commessaReport(commessaId: string) {
+  async commessaReport(commessaId: number) {
     const commessa = await this.prisma.commessa.findUnique({
       where: { id: commessaId },
       include: {
@@ -90,7 +91,7 @@ export class ReportService {
         audits: true,
         wps: true,
         wpqr: true,
-        checklists: true,
+        checklist: true,
         tracciabilita: {
           include: {
             materiale: { select: { codice: true, lotto: true } },
@@ -104,7 +105,7 @@ export class ReportService {
     }
 
     const aggregati = await this.prisma.nonConformita.groupBy({
-      by: ['stato'],
+      by: ["stato"],
       where: { commessaId },
       _count: { _all: true },
     });
@@ -117,7 +118,7 @@ export class ReportService {
 
   async materialiPerFornitore() {
     const rows = await this.prisma.materiale.groupBy({
-      by: ['fornitore'],
+      by: ["fornitore"],
       where: {
         fornitore: { not: null },
       },

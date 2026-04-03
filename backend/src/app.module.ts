@@ -45,7 +45,8 @@ import { WpsModule } from './wps/wps.module';
     PianiControlloModule,
     TracciabilitaModule,
     ReportModule,
-  ],
+    import { En1090Module } from './en1090/en1090.module';
+],
   controllers: [HealthController],
 })
 export class AppModule implements NestModule {

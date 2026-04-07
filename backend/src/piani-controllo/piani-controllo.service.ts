@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreatePianoControlloDto } from './dto/create-piano-controllo.dto';
-import { UpdatePianoControlloDto } from './dto/update-piano-controllo.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreatePianoControlloDto } from "./dto/create-piano-controllo.dto";
+import { UpdatePianoControlloDto } from "./dto/update-piano-controllo.dto";
 
 @Injectable()
 export class PianiControlloService {
@@ -12,7 +14,7 @@ export class PianiControlloService {
     await this.ensureCommessa(dto.commessaId);
     return this.prisma.pianoControllo.create({
       data: {
-        commessaId: dto.commessaId,
+        commessa: { connect: { id: dto.commessaId } },
         fase: dto.fase,
         controlliRichiesti:
           dto.controlliRichiesti as unknown as Prisma.InputJsonValue,
@@ -23,25 +25,25 @@ export class PianiControlloService {
 
   findAll() {
     return this.prisma.pianoControllo.findMany({
-      orderBy: { fase: 'asc' },
+      orderBy: { fase: "asc" },
       include: {
         commessa: { select: { id: true, codice: true, cliente: true } },
       },
     });
   }
 
-  async findByCommessa(commessaId: string) {
+  async findByCommessa(commessaId: number) {
     await this.ensureCommessa(commessaId);
     return this.prisma.pianoControllo.findMany({
       where: { commessaId },
-      orderBy: { fase: 'asc' },
+      orderBy: { fase: "asc" },
       include: {
         commessa: { select: { id: true, codice: true, cliente: true } },
       },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.pianoControllo.findUnique({
       where: { id },
       include: { commessa: true },
@@ -52,7 +54,7 @@ export class PianiControlloService {
     return row;
   }
 
-  async update(id: string, dto: UpdatePianoControlloDto) {
+  async update(id: number, dto: UpdatePianoControlloDto) {
     await this.ensureExists(id);
     if (dto.commessaId) {
       await this.ensureCommessa(dto.commessaId);
@@ -71,20 +73,22 @@ export class PianiControlloService {
     return this.prisma.pianoControllo.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.pianoControllo.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureCommessa(commessaId: string): Promise<void> {
-    const c = await this.prisma.commessa.findUnique({ where: { id: commessaId } });
+  private async ensureCommessa(commessaId: number): Promise<void> {
+    const c = await this.prisma.commessa.findUnique({
+      where: { id: commessaId },
+    });
     if (!c) {
       throw new NotFoundException(`Commessa ${commessaId} non trovata`);
     }
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number): Promise<void> {
     const x = await this.prisma.pianoControllo.findUnique({ where: { id } });
     if (!x) {
       throw new NotFoundException(`Piano di controllo ${id} non trovato`);

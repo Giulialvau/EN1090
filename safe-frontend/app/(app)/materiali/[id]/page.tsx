@@ -59,7 +59,9 @@ export default function MaterialeDetailPage() {
       await materialiApi.remove(id);
       router.replace("/materiali");
     } catch (e) {
-      setLoadError(e instanceof ApiError ? e.message : "Eliminazione non riuscita");
+      setLoadError(
+        e instanceof ApiError ? e.message : "Eliminazione non riuscita",
+      );
     }
   }
 
@@ -71,7 +73,10 @@ export default function MaterialeDetailPage() {
     return (
       <Card title="Materiale">
         <p className="text-sm text-red-600">{loadError ?? "Non trovato"}</p>
-        <Link href="/materiali" className="mt-2 inline-block text-sm text-sky-700 hover:underline">
+        <Link
+          href="/materiali"
+          className="mt-2 inline-block text-sm text-sky-700 hover:underline"
+        >
           Torna ai materiali
         </Link>
       </Card>
@@ -80,7 +85,9 @@ export default function MaterialeDetailPage() {
 
   const cid = String(row.commessaId ?? row.commessa_id ?? "");
   const comm = row.commessa as { codice?: string } | undefined;
-  const doc = row.certificatoDocumento as { id?: string; nome?: string } | undefined;
+  const doc = row.certificatoDocumento as
+    | { id?: string; nome?: string }
+    | undefined;
   const docId = row.certificatoDocumentoId ?? doc?.id;
 
   return (
@@ -99,13 +106,21 @@ export default function MaterialeDetailPage() {
           {cid ? (
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Commessa:{" "}
-              <Link className="text-sky-700 hover:underline" href={`/commesse/${cid}`}>
+              <Link
+                className="text-sky-700 hover:underline"
+                href={`/commesse/${cid}`}
+              >
                 {String(comm?.codice ?? cid)}
               </Link>
             </p>
           ) : null}
         </div>
-        <Button type="button" variant="ghost" className="text-red-700" onClick={() => void remove()}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-red-700"
+          onClick={() => void remove()}
+        >
           Elimina
         </Button>
       </div>
@@ -116,31 +131,43 @@ export default function MaterialeDetailPage() {
         ) : null}
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Codice</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Codice
+            </dt>
             <dd>{String(row.codice ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Lotto</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Lotto
+            </dt>
             <dd>{String(row.lotto ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Fornitore</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Fornitore
+            </dt>
             <dd>{String(row.fornitore ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Norma</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Norma
+            </dt>
             <dd>{String(row.norma ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Rif. 3.1</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Rif. 3.1
+            </dt>
             <dd>{String(row.certificato31 ?? row.certificato_3_1 ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Data carico</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Data carico
+            </dt>
             <dd>
               {formatDate(
                 (row.dataCarico as string | undefined) ??
-                  (row.data_carico as string | undefined)
+                  (row.data_carico as string | undefined),
               )}
             </dd>
           </div>
@@ -190,7 +217,7 @@ export default function MaterialeDetailPage() {
                 setUploadErr(
                   e instanceof ApiError
                     ? e.message
-                    : "Collegamento certificato non riuscito"
+                    : "Collegamento certificato non riuscito",
                 );
               }
             }}

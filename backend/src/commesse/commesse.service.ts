@@ -1,25 +1,28 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
-import { Commessa, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateCommessaDto } from './dto/create-commessa.dto';
-import { QueryCommessaDto } from './dto/query-commessa.dto';
-import { UpdateCommessaDto } from './dto/update-commessa.dto';
+} from "@nestjs/common";
+import { Commessa, Prisma } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateCommessaDto } from "./dto/create-commessa.dto";
+import { QueryCommessaDto } from "./dto/query-commessa.dto";
+import { UpdateCommessaDto } from "./dto/update-commessa.dto";
 
 /** Evita .trim su valori non-stringa (es. query duplicati → array) */
 function normalizeQueryString(v: unknown): string | undefined {
   if (v == null) return undefined;
-  if (typeof v === 'string') {
+  if (typeof v === "string") {
     const t = v.trim();
     return t.length ? t : undefined;
   }
   if (Array.isArray(v)) {
     const first = v[0];
-    if (typeof first === 'string') {
+    if (typeof first === "string") {
       const t = first.trim();
       return t.length ? t : undefined;
     }
@@ -28,13 +31,13 @@ function normalizeQueryString(v: unknown): string | undefined {
 }
 
 function parseDateBoundStart(s: unknown): Date | undefined {
-  if (typeof s !== 'string' || !s.trim()) return undefined;
+  if (typeof s !== "string" || !s.trim()) return undefined;
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
 function parseDateBoundEndInclusive(s: unknown): Date | undefined {
-  if (typeof s !== 'string' || !s.trim()) return undefined;
+  if (typeof s !== "string" || !s.trim()) return undefined;
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return undefined;
   d.setHours(23, 59, 59, 999);
@@ -49,10 +52,12 @@ const commessaIncludeFull = {
   audits: true,
   wps: true,
   wpqr: true,
-  checklists: true,
+  checklist: true,
   tracciabilita: {
     include: {
-      materiale: { select: { id: true, codice: true, lotto: true, descrizione: true } },
+      materiale: {
+        select: { id: true, codice: true, lotto: true, descrizione: true },
+      },
     },
   },
 } satisfies Prisma.CommessaInclude;
@@ -68,7 +73,9 @@ export class CommesseService {
       where: { codice: dto.codice },
     });
     if (exists) {
-      throw new ConflictException(`Commessa con codice ${dto.codice} già esistente`);
+      throw new ConflictException(
+        `Commessa con codice ${dto.codice} già esistente`,
+      );
     }
     return this.prisma.commessa.create({
       data: {
@@ -81,12 +88,14 @@ export class CommesseService {
         note: dto.note,
         dataInizio: dto.dataInizio,
         dataFine: dto.dataFine,
-        stato: dto.stato,
+        stato: dto.stato ?? "BOZZA",
       },
     });
   }
 
-  private buildCommessaWhere(query?: QueryCommessaDto): Prisma.CommessaWhereInput {
+  private buildCommessaWhere(
+    query?: QueryCommessaDto,
+  ): Prisma.CommessaWhereInput {
     const where: Prisma.CommessaWhereInput = {};
 
     if (query?.stato) {
@@ -97,7 +106,7 @@ export class CommesseService {
     if (cliente) {
       where.cliente = {
         contains: cliente,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -121,18 +130,18 @@ export class CommesseService {
     try {
       return await this.prisma.commessa.findMany({
         where: this.buildCommessaWhere(query),
-        orderBy: { codice: 'asc' },
+        orderBy: { codice: "asc" },
       });
     } catch (err) {
       this.logger.error(
-        'commesse.findAll: operazione fallita',
+        "commesse.findAll: operazione fallita",
         err instanceof Error ? err.stack : err,
       );
       return [];
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.commessa.findUnique({
       where: { id },
       include: commessaIncludeFull,
@@ -143,8 +152,13 @@ export class CommesseService {
     return row;
   }
 
-  async update(id: string, dto: UpdateCommessaDto) {
-    await this.ensureExists(id);
+  async update(id: number, dto: UpdateCommessaDto) {
+    const current = await this.ensureExists(id);
+    if (dto.stato && dto.stato !== current.stato) {
+      await this.validateStateTransition(id, current.stato, dto.stato, {
+        dataInizio: dto.dataInizio ?? current.dataInizio ?? undefined,
+      });
+    }
     if (dto.codice) {
       const clash = await this.prisma.commessa.findFirst({
         where: { codice: dto.codice, NOT: { id } },
@@ -153,22 +167,124 @@ export class CommesseService {
         throw new ConflictException(`Codice commessa ${dto.codice} già in uso`);
       }
     }
+    const {
+      codice,
+      titolo,
+      cliente,
+      descrizione,
+      responsabile,
+      luogo,
+      note,
+      dataInizio,
+      dataFine,
+      stato,
+    } = dto;
     return this.prisma.commessa.update({
       where: { id },
-      data: dto,
+      data: {
+        codice,
+        titolo,
+        cliente,
+        descrizione,
+        responsabile,
+        luogo,
+        note,
+        dataInizio,
+        dataFine,
+        stato,
+      },
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.commessa.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number) {
     const c = await this.prisma.commessa.findUnique({ where: { id } });
     if (!c) {
       throw new NotFoundException(`Commessa ${id} non trovata`);
+    }
+    return c;
+  }
+
+  private async validateStateTransition(
+    commessaId: number,
+    current: string,
+    next: string,
+    context: { dataInizio?: Date },
+  ): Promise<void> {
+    if (current === "CHIUSA" && next !== "CHIUSA") {
+      throw new BadRequestException(
+        "Una commessa chiusa non puo tornare in stato precedente.",
+      );
+    }
+    if (next === "IN_CORSO") {
+      if (!context.dataInizio) {
+        throw new BadRequestException(
+          "Per passare IN_CORSO e obbligatoria la data inizio.",
+        );
+      }
+      const [materiali, piani] = await Promise.all([
+        this.prisma.materiale.count({ where: { commessaId } }),
+        this.prisma.pianoControllo.count({ where: { commessaId } }),
+      ]);
+      if (materiali === 0 || piani === 0) {
+        throw new BadRequestException(
+          "Per passare IN_CORSO servono almeno un materiale e un piano di controllo.",
+        );
+      }
+    }
+    if (next === "CHIUSA") {
+      const [openNc, incompleteAudit, incompleteChecklist, noTrace, missingWpsWpqr] =
+        await Promise.all([
+          this.prisma.nonConformita.count({
+            where: { commessaId, stato: { not: "CHIUSA" } },
+          }),
+          this.prisma.audit.count({
+            where: {
+              commessaId,
+              OR: [{ note: null }, { note: "" }],
+            },
+          }),
+          this.prisma.checklist.count({
+            where: {
+              commessaId,
+              OR: [{ stato: { in: ["APERTA", "IN_CORSO"] } }, { esito: null }],
+            },
+          }),
+          this.prisma.tracciabilita.count({ where: { commessaId } }),
+          this.prisma.wps.count({
+            where: { commessaId, wpqr: { none: { scadenza: { gt: new Date() } } } },
+          }),
+        ]);
+      if (openNc > 0) {
+        throw new BadRequestException(
+          "Impossibile chiudere commessa: sono presenti non conformita aperte.",
+        );
+      }
+      if (incompleteAudit > 0) {
+        throw new BadRequestException(
+          "Impossibile chiudere commessa: audit incompleti (note mancanti).",
+        );
+      }
+      if (incompleteChecklist > 0) {
+        throw new BadRequestException(
+          "Impossibile chiudere commessa: checklist non completate o senza esito.",
+        );
+      }
+      if (noTrace === 0) {
+        throw new BadRequestException(
+          "Impossibile chiudere commessa senza almeno un record di tracciabilita.",
+        );
+      }
+      if (missingWpsWpqr > 0) {
+        throw new BadRequestException(
+          "Impossibile chiudere commessa: ogni WPS deve avere almeno un WPQR valido.",
+        );
+      }
     }
   }
 }

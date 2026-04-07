@@ -9,7 +9,7 @@ export type Id = string;
 export function pick<T>(
   obj: Record<string, unknown> | null | undefined,
   keys: string[],
-  fallback?: T
+  fallback?: T,
 ): T | undefined {
   if (!obj) return fallback;
   for (const k of keys) {

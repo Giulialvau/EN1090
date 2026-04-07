@@ -73,7 +73,7 @@ export function NonConformitaPanel({
       }
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento non conformità"
+        e instanceof ApiError ? e.message : "Errore caricamento non conformità",
       );
     } finally {
       setLoading(false);
@@ -119,14 +119,14 @@ export function NonConformitaPanel({
       tipo: String(r.tipo ?? "INTERNA"),
       gravita: String(r.gravita ?? "MEDIA"),
       stato: String(r.stato ?? "APERTA"),
-      azioniCorrettive: String(r.azioniCorrettive ?? ""),
+      azioniCorrettive: String(r.azioniCorrettive ?? r.azione ?? ""),
       dataApertura: formatDateIn(
         (r.dataApertura as string | undefined) ??
-          (r.data_apertura as string | undefined)
+          (r.data_apertura as string | undefined),
       ),
       dataChiusura: formatDateIn(
         (r.dataChiusura as string | undefined) ??
-          (r.data_chiusura as string | undefined)
+          (r.data_chiusura as string | undefined),
       ),
       commessaId: String(r.commessaId ?? r.commessa_id ?? ""),
     });
@@ -156,7 +156,7 @@ export function NonConformitaPanel({
         tipo: form.tipo,
         gravita: form.gravita,
         stato: form.stato,
-        azioniCorrettive: form.azioniCorrettive.trim() || undefined,
+        azione: form.azioniCorrettive.trim() || undefined,
         dataApertura: form.dataApertura
           ? new Date(form.dataApertura).toISOString()
           : undefined,
@@ -171,19 +171,14 @@ export function NonConformitaPanel({
         await nonConformitaApi.create(body);
       }
       setModalOpen(false);
-      if (
-        scope === "global" &&
-        applyUrlCommessaFilter &&
-        !urlFilter &&
-        cid
-      ) {
+      if (scope === "global" && applyUrlCommessaFilter && !urlFilter && cid) {
         router.replace(`/nc?commessaId=${encodeURIComponent(cid)}`);
       } else {
         await loadRows();
       }
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -198,7 +193,7 @@ export function NonConformitaPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -225,7 +220,7 @@ export function NonConformitaPanel({
       render: (r) =>
         formatDate(
           (r.dataApertura as string | undefined) ??
-            (r.data_apertura as string | undefined)
+            (r.data_apertura as string | undefined),
         ),
     },
   ];

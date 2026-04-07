@@ -44,7 +44,12 @@ export function Modal({ open, title, children, onClose, footer }: ModalProps) {
           >
             {title}
           </h2>
-          <Button type="button" variant="ghost" onClick={onClose} aria-label="Chiudi">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            aria-label="Chiudi"
+          >
             ✕
           </Button>
         </div>

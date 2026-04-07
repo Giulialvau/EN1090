@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
-import { NonConformitaController } from './non-conformita.controller';
-import { NonConformitaService } from './non-conformita.service';
+import { Module } from "@nestjs/common";
+
+import { NonConformitaController } from "./non-conformita.controller";
+import { NonConformitaService } from "./non-conformita.service";
 
 @Module({
   controllers: [NonConformitaController],

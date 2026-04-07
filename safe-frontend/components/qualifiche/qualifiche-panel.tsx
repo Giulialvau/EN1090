@@ -52,7 +52,7 @@ export function QualifichePanel({
       setRows(await qualificheApi.list());
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento qualifiche"
+        e instanceof ApiError ? e.message : "Errore caricamento qualifiche",
       );
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ export function QualifichePanel({
       scadenza: toIn(
         (q.scadenza as string | undefined) ??
           (q.dataScadenza as string | undefined) ??
-          (q.data_scadenza as string | undefined)
+          (q.data_scadenza as string | undefined),
       ),
       documento: String(q.documento ?? q.documentoUrl ?? ""),
     });
@@ -113,7 +113,7 @@ export function QualifichePanel({
       await loadRows();
     } catch (err) {
       setSaveError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -128,7 +128,7 @@ export function QualifichePanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -142,9 +142,7 @@ export function QualifichePanel({
           className="font-medium text-sky-700 hover:underline dark:text-sky-400"
           href={`/saldatori/${r.id}`}
         >
-          {String(
-            `${r.nome ?? ""} ${r.cognome ?? ""}`.trim() || r.nome || "—"
-          )}
+          {String(`${r.nome ?? ""} ${r.cognome ?? ""}`.trim() || r.nome || "—")}
         </Link>
       ),
     },
@@ -156,7 +154,7 @@ export function QualifichePanel({
         formatDate(
           (r.scadenza as string | undefined) ??
             (r.dataScadenza as string | undefined) ??
-            (r.data_scadenza as string | undefined)
+            (r.data_scadenza as string | undefined),
         ) || "—",
     },
   ];

@@ -9,7 +9,7 @@ export type { CommessaFormState } from "./components/commessa-fields";
 
 /** Corpo POST /commesse da form nuova commessa */
 export function commessaFormToCreateBody(
-  form: CommessaFormState
+  form: CommessaFormState,
 ): Record<string, unknown> {
   const toIsoDateOrUndefined = (value: string): string | undefined => {
     if (!value) return undefined;

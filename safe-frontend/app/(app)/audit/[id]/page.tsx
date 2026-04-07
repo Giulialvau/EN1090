@@ -41,7 +41,10 @@ export default function AuditDetailPage() {
     return (
       <Card title="Audit">
         <p className="text-sm text-red-600">{error ?? "Non trovato"}</p>
-        <Link href="/audit" className="mt-2 inline-block text-sm text-sky-700 hover:underline">
+        <Link
+          href="/audit"
+          className="mt-2 inline-block text-sm text-sky-700 hover:underline"
+        >
           Torna agli audit
         </Link>
       </Card>
@@ -65,7 +68,10 @@ export default function AuditDetailPage() {
         {cid ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Commessa:{" "}
-            <Link className="text-sky-700 hover:underline" href={`/commesse/${cid}`}>
+            <Link
+              className="text-sky-700 hover:underline"
+              href={`/commesse/${cid}`}
+            >
               {cid}
             </Link>
           </p>
@@ -75,19 +81,25 @@ export default function AuditDetailPage() {
       <Card title="Esito e pianificazione">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Stato</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Stato
+            </dt>
             <dd>{String(row.stato ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Esito</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Esito
+            </dt>
             <dd>{String(row.esito ?? "—")}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium uppercase text-zinc-500">Data programmata</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Data programmata
+            </dt>
             <dd>
               {formatDate(
                 (row.dataProgrammata as string | undefined) ??
-                  (row.data_programmata as string | undefined)
+                  (row.data_programmata as string | undefined),
               )}
             </dd>
           </div>

@@ -58,6 +58,7 @@ export function MaterialiPanel({
   const [documenti, setDocumenti] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -65,18 +66,19 @@ export function MaterialiPanel({
   const [pdfOpening, setPdfOpening] = useState<string | null>(null);
 
   const effectiveCommessaId =
-    scope === "commessa" ? commessaId ?? "" : form.commessaId;
+    scope === "commessa" ? (commessaId ?? "") : form.commessaId;
 
   const documentiPerCommessa = useMemo(() => {
     const cid = effectiveCommessaId;
     if (!cid) return [];
     return documenti.filter(
-      (d) => String(d.commessaId ?? d.commessa_id) === cid
+      (d) => String(d.commessaId ?? d.commessa_id) === cid,
     );
   }, [documenti, effectiveCommessaId]);
 
   const loadRows = useCallback(async () => {
     setError(null);
+    setSuccess(null);
     if (skipGlobalFetch) {
       setRows([]);
       setLoading(false);
@@ -86,7 +88,11 @@ export function MaterialiPanel({
     try {
       if (scope === "commessa" && commessaId) {
         setRows(await materialiApi.byCommessa(commessaId));
-      } else if (scope === "global" && applyUrlCommessaFilter && urlCommessaFilter) {
+      } else if (
+        scope === "global" &&
+        applyUrlCommessaFilter &&
+        urlCommessaFilter
+      ) {
         setRows(await materialiApi.byCommessa(urlCommessaFilter));
       } else if (scope === "global") {
         setRows(await materialiApi.list());
@@ -95,12 +101,18 @@ export function MaterialiPanel({
       }
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento materiali"
+        e instanceof ApiError ? e.message : "Errore caricamento materiali",
       );
     } finally {
       setLoading(false);
     }
-  }, [scope, commessaId, applyUrlCommessaFilter, urlCommessaFilter, skipGlobalFetch]);
+  }, [
+    scope,
+    commessaId,
+    applyUrlCommessaFilter,
+    urlCommessaFilter,
+    skipGlobalFetch,
+  ]);
 
   useEffect(() => {
     void loadRows();
@@ -166,10 +178,10 @@ export function MaterialiPanel({
       fornitore: String(m.fornitore ?? ""),
       dataCarico: toInputDate(
         (m.dataCarico as string | undefined) ??
-          (m.data_carico as string | undefined)
+          (m.data_carico as string | undefined),
       ),
       certificatoDocumentoId: String(
-        m.certificatoDocumentoId ?? m.certificatoDocumento?.id ?? ""
+        m.certificatoDocumentoId ?? m.certificatoDocumento?.id ?? "",
       ),
       commessaId: String(m.commessaId ?? m.commessa_id ?? ""),
     });
@@ -179,14 +191,25 @@ export function MaterialiPanel({
 
   async function saveMateriale(e: React.FormEvent) {
     e.preventDefault();
-    const cid =
-      scope === "commessa" ? commessaId : form.commessaId.trim();
+    const cid = scope === "commessa" ? commessaId : form.commessaId.trim();
     if (!cid) {
       setError("Seleziona una commessa.");
       return;
     }
     if (!form.codice.trim() || !form.descrizione.trim()) {
       setError("Codice e descrizione sono obbligatori.");
+      return;
+    }
+    if (!form.tipo.trim() || !form.norma.trim()) {
+      setError("Tipo e norma sono obbligatori.");
+      return;
+    }
+    if (!form.lotto.trim() || !form.fornitore.trim()) {
+      setError("Lotto e fornitore sono obbligatori.");
+      return;
+    }
+    if (!form.certificato31.trim() && !form.certificatoDocumentoId.trim()) {
+      setError("Inserisci certificato 3.1 testuale o collega un PDF.");
       return;
     }
     setSaving(true);
@@ -221,14 +244,14 @@ export function MaterialiPanel({
         commessaIdForUrl
       ) {
         router.replace(
-          `/materiali?commessaId=${encodeURIComponent(commessaIdForUrl)}`
+          `/materiali?commessaId=${encodeURIComponent(commessaIdForUrl)}`,
         );
       } else {
         await loadRows();
       }
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -238,12 +261,14 @@ export function MaterialiPanel({
   async function removeMateriale(m: Materiale) {
     if (!window.confirm(`Eliminare il materiale ${m.codice ?? m.id}?`)) return;
     setError(null);
+    setSuccess(null);
     try {
       await materialiApi.remove(m.id);
       await loadRows();
+      setSuccess("Eliminato con successo.");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -287,14 +312,15 @@ export function MaterialiPanel({
     {
       key: "cert31",
       header: "Rif. 3.1",
-      render: (r) =>
-        String(r.certificato31 ?? r.certificato_3_1 ?? "—"),
+      render: (r) => String(r.certificato31 ?? r.certificato_3_1 ?? "—"),
     },
     {
       key: "certPdf",
       header: "Cert. PDF",
       render: (r) => {
-        const doc = r.certificatoDocumento as { id?: string; nome?: string } | undefined;
+        const doc = r.certificatoDocumento as
+          | { id?: string; nome?: string }
+          | undefined;
         const docId = r.certificatoDocumentoId ?? doc?.id;
         if (!docId) return "—";
         return (
@@ -314,9 +340,7 @@ export function MaterialiPanel({
   ];
 
   if (scope === "commessa" && !commessaId) {
-    return (
-      <p className="text-sm text-amber-700">Commessa non valida.</p>
-    );
+    return <p className="text-sm text-amber-700">Commessa non valida.</p>;
   }
 
   const docLink =
@@ -344,6 +368,11 @@ export function MaterialiPanel({
     >
       {error ? (
         <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p>
+      ) : null}
+      {success ? (
+        <p className="mb-3 text-sm text-emerald-700 dark:text-emerald-400">
+          {success}
+        </p>
       ) : null}
       {scope === "global" ? (
         <p className="mb-3 text-xs text-zinc-500">
@@ -464,7 +493,11 @@ export function MaterialiPanel({
           </>
         }
       >
-        <form id="form-materiale" className="space-y-3" onSubmit={saveMateriale}>
+        <form
+          id="form-materiale"
+          className="space-y-3"
+          onSubmit={saveMateriale}
+        >
           {scope === "global" ? (
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -509,30 +542,38 @@ export function MaterialiPanel({
               required
             />
             <Input
-              label="Tipo"
+              label="Tipo * (acciaio, inox, alluminio)"
               name="tipo"
               value={form.tipo}
               onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value }))}
+              required
             />
             <Input
-              label="Norma"
+              label="Norma *"
               name="norma"
               value={form.norma}
-              onChange={(e) => setForm((f) => ({ ...f, norma: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, norma: e.target.value }))
+              }
+              required
             />
             <Input
-              label="Lotto"
+              label="Lotto *"
               name="lotto"
               value={form.lotto}
-              onChange={(e) => setForm((f) => ({ ...f, lotto: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, lotto: e.target.value }))
+              }
+              required
             />
             <Input
-              label="Fornitore"
+              label="Fornitore *"
               name="fornitore"
               value={form.fornitore}
               onChange={(e) =>
                 setForm((f) => ({ ...f, fornitore: e.target.value }))
               }
+              required
             />
             <Input
               label="Riferimento certificato 3.1 (testo)"

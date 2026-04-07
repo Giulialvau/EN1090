@@ -1,8 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateTracciabilitaDto } from './dto/create-tracciabilita.dto';
-import { UpdateTracciabilitaDto } from './dto/update-tracciabilita.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateTracciabilitaDto } from "./dto/create-tracciabilita.dto";
+import { UpdateTracciabilitaDto } from "./dto/update-tracciabilita.dto";
 
 const tracciabilitaInclude = {
   materiale: {
@@ -22,6 +28,11 @@ export class TracciabilitaService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateTracciabilitaDto) {
+    if (!dto.riferimentoDisegno?.trim()) {
+      throw new BadRequestException(
+        "Il riferimento disegno e obbligatorio per la tracciabilita.",
+      );
+    }
     await this.ensureMaterialeCommessaCoherent(dto.materialeId, dto.commessaId);
     return this.prisma.tracciabilita.create({
       data: {
@@ -39,21 +50,21 @@ export class TracciabilitaService {
 
   findAll() {
     return this.prisma.tracciabilita.findMany({
-      orderBy: [{ posizione: 'asc' }, { id: 'asc' }],
+      orderBy: [{ posizione: "asc" }, { id: "asc" }],
       include: tracciabilitaInclude,
     });
   }
 
-  async findByCommessa(commessaId: string) {
+  async findByCommessa(commessaId: number) {
     await this.ensureCommessaExists(commessaId);
     return this.prisma.tracciabilita.findMany({
       where: { commessaId },
-      orderBy: [{ posizione: 'asc' }, { id: 'asc' }],
+      orderBy: [{ posizione: "asc" }, { id: "asc" }],
       include: tracciabilitaInclude,
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.tracciabilita.findUnique({
       where: { id },
       include: tracciabilitaInclude,
@@ -64,7 +75,7 @@ export class TracciabilitaService {
     return row;
   }
 
-  async update(id: string, dto: UpdateTracciabilitaDto) {
+  async update(id: number, dto: UpdateTracciabilitaDto) {
     await this.ensureExists(id);
     const mid = dto.materialeId;
     const cid = dto.commessaId;
@@ -78,6 +89,11 @@ export class TracciabilitaService {
       await this.ensureMaterialeCommessaCoherent(
         mid ?? current.materialeId,
         cid ?? current.commessaId,
+      );
+    }
+    if (dto.riferimentoDisegno !== undefined && !dto.riferimentoDisegno.trim()) {
+      throw new BadRequestException(
+        "Il riferimento disegno non puo essere vuoto.",
       );
     }
     const data: Prisma.TracciabilitaUpdateInput = {
@@ -102,22 +118,24 @@ export class TracciabilitaService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.tracciabilita.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureCommessaExists(commessaId: string): Promise<void> {
-    const c = await this.prisma.commessa.findUnique({ where: { id: commessaId } });
+  private async ensureCommessaExists(commessaId: number): Promise<void> {
+    const c = await this.prisma.commessa.findUnique({
+      where: { id: commessaId },
+    });
     if (!c) {
       throw new NotFoundException(`Commessa ${commessaId} non trovata`);
     }
   }
 
   private async ensureMaterialeCommessaCoherent(
-    materialeId: string,
-    commessaId: string,
+    materialeId: number,
+    commessaId: number,
   ): Promise<void> {
     const m = await this.prisma.materiale.findUnique({
       where: { id: materialeId },
@@ -133,12 +151,17 @@ export class TracciabilitaService {
     }
     if (m.commessaId !== commessaId) {
       throw new BadRequestException(
-        'Il materiale non appartiene alla commessa indicata: tracciabilità incoerente',
+        "Il materiale non appartiene alla commessa indicata: tracciabilità incoerente",
+      );
+    }
+    if (!m.lotto?.trim() || !m.norma?.trim() || (!m.certificato31?.trim() && !m.certificatoDocumentoId)) {
+      throw new BadRequestException(
+        "Materiale non qualificato: servono lotto, norma e certificato 3.1 (testo o PDF).",
       );
     }
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number): Promise<void> {
     const t = await this.prisma.tracciabilita.findUnique({ where: { id } });
     if (!t) {
       throw new NotFoundException(`Tracciabilità ${id} non trovata`);

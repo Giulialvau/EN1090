@@ -128,13 +128,13 @@ export function ChecklistPanel({
   const [allegatiDocIds, setAllegatiDocIds] = useState<string[]>([]);
 
   const effectiveCommessaId =
-    scope === "commessa" ? commessaId ?? "" : formCommessaId;
+    scope === "commessa" ? (commessaId ?? "") : formCommessaId;
 
   const documentiPerCommessa = useMemo(() => {
     const cid = effectiveCommessaId;
     if (!cid) return [];
     return documenti.filter(
-      (d) => String(d.commessaId ?? d.commessa_id) === cid
+      (d) => String(d.commessaId ?? d.commessa_id) === cid,
     );
   }, [documenti, effectiveCommessaId]);
 
@@ -149,7 +149,11 @@ export function ChecklistPanel({
     try {
       if (scope === "commessa" && commessaId) {
         setRows(await checklistApi.byCommessa(commessaId));
-      } else if (scope === "global" && applyUrlCommessaFilter && urlCommessaFilter) {
+      } else if (
+        scope === "global" &&
+        applyUrlCommessaFilter &&
+        urlCommessaFilter
+      ) {
         setRows(await checklistApi.byCommessa(urlCommessaFilter));
       } else if (scope === "global") {
         setRows(await checklistApi.list());
@@ -158,7 +162,7 @@ export function ChecklistPanel({
       }
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento checklist"
+        e instanceof ApiError ? e.message : "Errore caricamento checklist",
       );
     } finally {
       setLoading(false);
@@ -240,7 +244,9 @@ export function ChecklistPanel({
     setEsito(c.esito ? String(c.esito) : "");
     setOperatore(String(c.operatore ?? ""));
     setNote(String(c.note ?? ""));
-    setDataCompilazione(toInputDateTime(c.dataCompilazione as string | undefined));
+    setDataCompilazione(
+      toInputDateTime(c.dataCompilazione as string | undefined),
+    );
     setElementi(parseElementi(c.elementi));
     setFormCommessaId(String(c.commessaId ?? c.commessa_id ?? ""));
     const alleg = c.allegati;
@@ -325,7 +331,7 @@ export function ChecklistPanel({
       }
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -341,14 +347,14 @@ export function ChecklistPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
 
   function updateElemento(i: number, patch: Partial<ElementoRow>) {
     setElementi((prev) =>
-      prev.map((row, j) => (j === i ? { ...row, ...patch } : row))
+      prev.map((row, j) => (j === i ? { ...row, ...patch } : row)),
     );
   }
 
@@ -358,7 +364,7 @@ export function ChecklistPanel({
 
   function removeElemento(i: number) {
     setElementi((prev) =>
-      prev.length <= 1 ? prev : prev.filter((_, j) => j !== i)
+      prev.length <= 1 ? prev : prev.filter((_, j) => j !== i),
     );
   }
 
@@ -465,8 +471,8 @@ export function ChecklistPanel({
         </p>
       ) : (
         <p className="mb-3 text-xs text-zinc-500">
-          Elenco aggiornato da GET /commesse/:id/checklist. Dettaglio e
-          modifica anche da{" "}
+          Elenco aggiornato da GET /commesse/:id/checklist. Dettaglio e modifica
+          anche da{" "}
           <Link href="/checklist" className="text-sky-700 underline">
             Checklist globali
           </Link>
@@ -712,7 +718,9 @@ export function ChecklistPanel({
                   <Input
                     label="Note punto"
                     value={el.note}
-                    onChange={(e) => updateElemento(i, { note: e.target.value })}
+                    onChange={(e) =>
+                      updateElemento(i, { note: e.target.value })
+                    }
                   />
                 </div>
                 <Button
@@ -744,7 +752,7 @@ export function ChecklistPanel({
                 value={allegatiDocIds}
                 onChange={(e) => {
                   const opts = Array.from(e.target.selectedOptions).map(
-                    (o) => o.value
+                    (o) => o.value,
                   );
                   setAllegatiDocIds(opts);
                 }}

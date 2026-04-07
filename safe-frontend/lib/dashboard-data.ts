@@ -80,11 +80,9 @@ function dataScadenzaWpqr(w: Wpqr): string | undefined {
 }
 
 function dataScadenzaQual(q: Qualifica): string | undefined {
-  return pick(
-    q,
-    ["dataScadenza", "data_scadenza", "scadenza"],
-    undefined
-  ) as string | undefined;
+  return pick(q, ["dataScadenza", "data_scadenza", "scadenza"], undefined) as
+    | string
+    | undefined;
 }
 
 function dataAudit(a: Audit): string | undefined {
@@ -101,17 +99,17 @@ function ncIsOpen(x: NonConformita): boolean {
 function materialeSenzaCertificato(m: Materiale): boolean {
   const hasDoc = Boolean(
     m.certificatoDocumentoId ||
-      (m.certificatoDocumento as { id?: string } | undefined)?.id
+    (m.certificatoDocumento as { id?: string } | undefined)?.id,
   );
   const hasText = Boolean(
-    String(m.certificato31 ?? m.certificato_3_1 ?? "").trim()
+    String(m.certificato31 ?? m.certificato_3_1 ?? "").trim(),
   );
   return !hasDoc && !hasText;
 }
 
 function checklistIsIncomplete(c: Checklist): boolean {
   const s = String(
-    c.stato ?? c.statoCompletamento ?? c.stato_completamento ?? ""
+    c.stato ?? c.statoCompletamento ?? c.stato_completamento ?? "",
   ).toUpperCase();
   return s !== "COMPLETATA" && s !== "ARCHIVIATA";
 }
@@ -252,7 +250,7 @@ export async function loadDashboardData(): Promise<DashboardPayload> {
   }
 
   scadenze.sort(
-    (a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+    (a, b) => new Date(a.data).getTime() - new Date(b.data).getTime(),
   );
 
   const riep = reportDashboard?.riepilogo;

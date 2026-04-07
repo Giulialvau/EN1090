@@ -59,7 +59,9 @@ export function Table<T>({
                   >
                     {col.render
                       ? col.render(row)
-                      : String((row as Record<string, unknown>)[col.key] ?? "—")}
+                      : String(
+                          (row as Record<string, unknown>)[col.key] ?? "—",
+                        )}
                   </td>
                 ))}
               </tr>

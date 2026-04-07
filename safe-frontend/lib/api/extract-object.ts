@@ -6,7 +6,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  * Normalizza risposte POST/PATCH Nest (`{ data: T }`, doppio wrapper, oggetto diretto, array[0]).
  */
 export function extractObject<T extends Record<string, unknown>>(
-  raw: unknown
+  raw: unknown,
 ): T | null {
   let cur: unknown = raw;
   for (let i = 0; i < 4; i++) {

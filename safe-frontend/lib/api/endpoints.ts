@@ -37,7 +37,7 @@ export const authApi = {
     const raw = await apiPost<unknown>(
       "/auth/login",
       { email, password },
-      { skipAuth: true }
+      { skipAuth: true },
     );
     const inner = unwrapOne<LoginResponse>(raw);
     if (inner && typeof inner === "object") return inner;
@@ -66,7 +66,7 @@ function commesseQueryString(params?: CommesseListParams): string {
 export const commesseApi = {
   list: (params?: CommesseListParams) =>
     apiGet<unknown>(`/commesse${commesseQueryString(params)}`).then(
-      unwrapList<Commessa>
+      unwrapList<Commessa>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/commesse/${id}`).then(unwrapOne<Commessa>),
@@ -74,8 +74,7 @@ export const commesseApi = {
     apiPost<unknown>("/commesse", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/commesse/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/commesse/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/commesse/${id}`),
 };
 
 /** Report sintetico per singola commessa (GET /report/commessa/:id) */
@@ -85,11 +84,10 @@ export const reportCommessaApi = {
 };
 
 export const documentiApi = {
-  list: () =>
-    apiGet<unknown>("/documenti").then(unwrapList<Documento>),
+  list: () => apiGet<unknown>("/documenti").then(unwrapList<Documento>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/documenti`).then(
-      unwrapList<Documento>
+      unwrapList<Documento>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/documenti/${id}`).then(unwrapOne<Documento>),
@@ -105,7 +103,8 @@ export const documentiApi = {
     form.append("title", params.title.trim());
     form.append("commessaId", params.commessaId);
     if (params.tipo?.trim()) form.append("tipo", params.tipo.trim());
-    if (params.versione?.trim()) form.append("versione", params.versione.trim());
+    if (params.versione?.trim())
+      form.append("versione", params.versione.trim());
     const raw = await apiRequest<unknown>("/documenti/upload", {
       method: "POST",
       body: form,
@@ -113,20 +112,16 @@ export const documentiApi = {
     return unwrapOne<Documento>(raw) ?? (raw as Documento);
   },
   /** Download binario (PDF o immagine) con Authorization */
-  downloadFile: (id: string) =>
-    apiFetchBlob(`/documenti/${id}/download`),
-  downloadPdf: (id: string) =>
-    apiFetchBlob(`/documenti/${id}/download`),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/documenti/${id}`),
+  downloadFile: (id: string) => apiFetchBlob(`/documenti/${id}/download`),
+  downloadPdf: (id: string) => apiFetchBlob(`/documenti/${id}/download`),
+  remove: (id: string) => apiDelete<unknown>(`/documenti/${id}`),
 };
 
 export const checklistApi = {
-  list: () =>
-    apiGet<unknown>("/checklist").then(unwrapList<Checklist>),
+  list: () => apiGet<unknown>("/checklist").then(unwrapList<Checklist>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/checklist`).then(
-      unwrapList<Checklist>
+      unwrapList<Checklist>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/checklist/${id}`).then(unwrapOne<Checklist>),
@@ -134,16 +129,14 @@ export const checklistApi = {
     apiPost<unknown>("/checklist", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/checklist/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/checklist/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/checklist/${id}`),
 };
 
 export const materialiApi = {
-  list: () =>
-    apiGet<unknown>("/materiali").then(unwrapList<Materiale>),
+  list: () => apiGet<unknown>("/materiali").then(unwrapList<Materiale>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/materiali`).then(
-      unwrapList<Materiale>
+      unwrapList<Materiale>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/materiali/${id}`).then(unwrapOne<Materiale>),
@@ -151,71 +144,55 @@ export const materialiApi = {
     apiPost<unknown>("/materiali", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/materiali/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/materiali/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/materiali/${id}`),
 };
 
 export const wpsApi = {
-  list: () =>
-    apiGet<unknown>("/wps").then(unwrapList<Wps>),
+  list: () => apiGet<unknown>("/wps").then(unwrapList<Wps>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/wps`).then(unwrapList<Wps>),
-  get: (id: string) =>
-    apiGet<unknown>(`/wps/${id}`).then(unwrapOne<Wps>),
-  create: (body: Record<string, unknown>) =>
-    apiPost<unknown>("/wps", body),
+  get: (id: string) => apiGet<unknown>(`/wps/${id}`).then(unwrapOne<Wps>),
+  create: (body: Record<string, unknown>) => apiPost<unknown>("/wps", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/wps/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/wps/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/wps/${id}`),
 };
 
 export const wpqrApi = {
-  list: () =>
-    apiGet<unknown>("/wpqr").then(unwrapList<Wpqr>),
+  list: () => apiGet<unknown>("/wpqr").then(unwrapList<Wpqr>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/wpqr`).then(unwrapList<Wpqr>),
-  get: (id: string) =>
-    apiGet<unknown>(`/wpqr/${id}`).then(unwrapOne<Wpqr>),
-  create: (body: Record<string, unknown>) =>
-    apiPost<unknown>("/wpqr", body),
+  get: (id: string) => apiGet<unknown>(`/wpqr/${id}`).then(unwrapOne<Wpqr>),
+  create: (body: Record<string, unknown>) => apiPost<unknown>("/wpqr", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/wpqr/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/wpqr/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/wpqr/${id}`),
 };
 
 export const qualificheApi = {
-  list: () =>
-    apiGet<unknown>("/qualifiche").then(unwrapList<Qualifica>),
+  list: () => apiGet<unknown>("/qualifiche").then(unwrapList<Qualifica>),
   get: (id: string) =>
     apiGet<unknown>(`/qualifiche/${id}`).then(unwrapOne<Qualifica>),
   create: (body: Record<string, unknown>) =>
     apiPost<unknown>("/qualifiche", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/qualifiche/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/qualifiche/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/qualifiche/${id}`),
 };
 
 export const attrezzatureApi = {
-  list: () =>
-    apiGet<unknown>("/attrezzature").then(unwrapList<Attrezzatura>),
+  list: () => apiGet<unknown>("/attrezzature").then(unwrapList<Attrezzatura>),
 };
 
 export const auditApi = {
-  list: () =>
-    apiGet<unknown>("/audit").then(unwrapList<Audit>),
+  list: () => apiGet<unknown>("/audit").then(unwrapList<Audit>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/audit`).then(unwrapList<Audit>),
-  get: (id: string) =>
-    apiGet<unknown>(`/audit/${id}`).then(unwrapOne<Audit>),
-  create: (body: Record<string, unknown>) =>
-    apiPost<unknown>("/audit", body),
+  get: (id: string) => apiGet<unknown>(`/audit/${id}`).then(unwrapOne<Audit>),
+  create: (body: Record<string, unknown>) => apiPost<unknown>("/audit", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/audit/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/audit/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/audit/${id}`),
 };
 
 export const nonConformitaApi = {
@@ -223,7 +200,7 @@ export const nonConformitaApi = {
     apiGet<unknown>("/non-conformita").then(unwrapList<NonConformita>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/non-conformita`).then(
-      unwrapList<NonConformita>
+      unwrapList<NonConformita>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/non-conformita/${id}`).then(unwrapOne<NonConformita>),
@@ -231,8 +208,7 @@ export const nonConformitaApi = {
     apiPost<unknown>("/non-conformita", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/non-conformita/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/non-conformita/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/non-conformita/${id}`),
 };
 
 export const pianiControlloApi = {
@@ -240,7 +216,7 @@ export const pianiControlloApi = {
     apiGet<unknown>("/piani-controllo").then(unwrapList<PianoControllo>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/piani-controllo`).then(
-      unwrapList<PianoControllo>
+      unwrapList<PianoControllo>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/piani-controllo/${id}`).then(unwrapOne<PianoControllo>),
@@ -248,8 +224,7 @@ export const pianiControlloApi = {
     apiPost<unknown>("/piani-controllo", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/piani-controllo/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/piani-controllo/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/piani-controllo/${id}`),
 };
 
 export const tracciabilitaApi = {
@@ -257,18 +232,17 @@ export const tracciabilitaApi = {
     apiGet<unknown>("/tracciabilita").then(unwrapList<TracciabilitaRecord>),
   byCommessa: (commessaId: string) =>
     apiGet<unknown>(`/commesse/${commessaId}/tracciabilita`).then(
-      unwrapList<TracciabilitaRecord>
+      unwrapList<TracciabilitaRecord>,
     ),
   get: (id: string) =>
     apiGet<unknown>(`/tracciabilita/${id}`).then(
-      unwrapOne<TracciabilitaRecord>
+      unwrapOne<TracciabilitaRecord>,
     ),
   create: (body: Record<string, unknown>) =>
     apiPost<unknown>("/tracciabilita", body),
   update: (id: string, body: Record<string, unknown>) =>
     apiPatch<unknown>(`/tracciabilita/${id}`, body),
-  remove: (id: string) =>
-    apiDelete<unknown>(`/tracciabilita/${id}`),
+  remove: (id: string) => apiDelete<unknown>(`/tracciabilita/${id}`),
 };
 
 export const reportApi = {
@@ -293,7 +267,7 @@ export type ReportPdfTipo =
 export const reportPdfApi = {
   download: (tipo: ReportPdfTipo, commessaId: string) =>
     apiFetchBlob(
-      `/report/${tipo}?commessaId=${encodeURIComponent(commessaId)}`
+      `/report/${tipo}?commessaId=${encodeURIComponent(commessaId)}`,
     ),
 };
 
@@ -306,26 +280,22 @@ export const dashboardApi = {
   commesseAll: () => commesseApi.list(),
   nonConformitaOpen: () =>
     apiGet<unknown>("/non-conformita?status=open").then(
-      unwrapList<NonConformita>
+      unwrapList<NonConformita>,
     ),
   materialiMissingCert: () =>
     apiGet<unknown>("/materiali?missingCert=true").then(unwrapList<Materiale>),
   checklistIncomplete: () =>
-    apiGet<unknown>("/checklist?status=incomplete").then(
-      unwrapList<Checklist>
-    ),
+    apiGet<unknown>("/checklist?status=incomplete").then(unwrapList<Checklist>),
   auditPending: () =>
     apiGet<unknown>("/audit?status=pending").then(unwrapList<Audit>),
   qualificheExpiresSoon: () =>
-    apiGet<unknown>("/qualifiche?expiresSoon=true").then(
-      unwrapList<Qualifica>
-    ),
+    apiGet<unknown>("/qualifiche?expiresSoon=true").then(unwrapList<Qualifica>),
   wpsExpiresSoon: () =>
     apiGet<unknown>("/wps?expiresSoon=true").then(unwrapList<Wps>),
   wpqrExpiresSoon: () =>
     apiGet<unknown>("/wpqr?expiresSoon=true").then(unwrapList<Wpqr>),
   pianiControlloOpen: () =>
     apiGet<unknown>("/piani-controllo?status=open").then(
-      unwrapList<PianoControllo>
+      unwrapList<PianoControllo>,
     ),
 };

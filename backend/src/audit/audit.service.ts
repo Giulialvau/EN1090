@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateAuditDto } from './dto/create-audit.dto';
-import { UpdateAuditDto } from './dto/update-audit.dto';
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+
+import { PrismaService } from "../prisma/prisma.service";
+
+import { CreateAuditDto } from "./dto/create-audit.dto";
+import { UpdateAuditDto } from "./dto/update-audit.dto";
 
 @Injectable()
 export class AuditService {
@@ -9,30 +11,42 @@ export class AuditService {
 
   async create(dto: CreateAuditDto) {
     await this.ensureCommessa(dto.commessaId);
-    return this.prisma.audit.create({ data: dto });
+    if (!dto.note?.trim()) {
+      throw new BadRequestException("Le note audit sono obbligatorie.");
+    }
+    return this.prisma.audit.create({
+      data: {
+        commessaId: dto.commessaId,
+        titolo: dto.titolo,
+        data: dto.data,
+        auditor: dto.auditor,
+        esito: dto.esito,
+        note: dto.note,
+      },
+    });
   }
 
   findAll() {
     return this.prisma.audit.findMany({
-      orderBy: { data: 'desc' },
+      orderBy: { data: "desc" },
       include: {
         commessa: { select: { id: true, codice: true, cliente: true } },
       },
     });
   }
 
-  async findByCommessa(commessaId: string) {
+  async findByCommessa(commessaId: number) {
     await this.ensureCommessa(commessaId);
     return this.prisma.audit.findMany({
       where: { commessaId },
-      orderBy: { data: 'desc' },
+      orderBy: { data: "desc" },
       include: {
         commessa: { select: { id: true, codice: true, cliente: true } },
       },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const row = await this.prisma.audit.findUnique({
       where: { id },
       include: { commessa: true },
@@ -43,31 +57,45 @@ export class AuditService {
     return row;
   }
 
-  async update(id: string, dto: UpdateAuditDto) {
-    await this.ensureExists(id);
+  async update(id: number, dto: UpdateAuditDto) {
+    const current = await this.ensureExists(id);
+    if (!((dto.note ?? current.note)?.trim())) {
+      throw new BadRequestException("Le note audit sono obbligatorie.");
+    }
     if (dto.commessaId) {
       await this.ensureCommessa(dto.commessaId);
     }
-    return this.prisma.audit.update({ where: { id }, data: dto });
+    const data = {
+      titolo: dto.titolo,
+      data: dto.data,
+      auditor: dto.auditor,
+      esito: dto.esito,
+      note: dto.note,
+      // commessaId non aggiornabile via update DTO (evita mismatch Prisma UpdateInput)
+    };
+    return this.prisma.audit.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.ensureExists(id);
     await this.prisma.audit.delete({ where: { id } });
     return { deleted: true, id };
   }
 
-  private async ensureCommessa(commessaId: string): Promise<void> {
-    const c = await this.prisma.commessa.findUnique({ where: { id: commessaId } });
+  private async ensureCommessa(commessaId: number): Promise<void> {
+    const c = await this.prisma.commessa.findUnique({
+      where: { id: commessaId },
+    });
     if (!c) {
       throw new NotFoundException(`Commessa ${commessaId} non trovata`);
     }
   }
 
-  private async ensureExists(id: string): Promise<void> {
+  private async ensureExists(id: number) {
     const a = await this.prisma.audit.findUnique({ where: { id } });
     if (!a) {
       throw new NotFoundException(`Audit ${id} non trovato`);
     }
+    return a;
   }
 }

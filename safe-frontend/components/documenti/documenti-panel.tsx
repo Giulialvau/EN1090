@@ -59,7 +59,7 @@ export function DocumentiPanel({
       }
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento documenti"
+        e instanceof ApiError ? e.message : "Errore caricamento documenti",
       );
     } finally {
       setLoading(false);
@@ -102,7 +102,7 @@ export function DocumentiPanel({
   const visibleRows = useMemo(() => {
     if (!urlFilter) return rows;
     return rows.filter(
-      (r) => String(r.commessaId ?? r.commessa_id) === urlFilter
+      (r) => String(r.commessaId ?? r.commessa_id) === urlFilter,
     );
   }, [rows, urlFilter]);
 
@@ -121,15 +121,14 @@ export function DocumentiPanel({
   }
 
   async function removeDoc(d: Documento) {
-    if (!window.confirm(`Eliminare il documento «${d.nome ?? d.id}»?`))
-      return;
+    if (!window.confirm(`Eliminare il documento «${d.nome ?? d.id}»?`)) return;
     setError(null);
     try {
       await documentiApi.remove(d.id);
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -153,9 +152,7 @@ export function DocumentiPanel({
       key: "stato",
       header: "Approvazione",
       render: (r) =>
-        String(
-          r.statoApprovazione ?? r.stato_approvazione ?? r.stato ?? "—"
-        ),
+        String(r.statoApprovazione ?? r.stato_approvazione ?? r.stato ?? "—"),
     },
     {
       key: "scadenza",
@@ -163,7 +160,7 @@ export function DocumentiPanel({
       render: (r) =>
         formatDate(
           (r.dataScadenza as string | undefined) ??
-            (r.data_scadenza as string | undefined)
+            (r.data_scadenza as string | undefined),
         ),
     },
     {
@@ -204,7 +201,7 @@ export function DocumentiPanel({
   ];
 
   const effectiveCommessaId =
-    scope === "commessa" ? commessaId ?? "" : formCommessaId;
+    scope === "commessa" ? (commessaId ?? "") : formCommessaId;
 
   if (scope === "commessa" && !commessaId) {
     return <p className="text-sm text-amber-700">Commessa non valida.</p>;
@@ -278,7 +275,11 @@ export function DocumentiPanel({
         title="Carica documento"
         onClose={() => setUploadOpen(false)}
         footer={
-          <Button type="button" variant="secondary" onClick={() => setUploadOpen(false)}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setUploadOpen(false)}
+          >
             Chiudi
           </Button>
         }

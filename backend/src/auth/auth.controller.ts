@@ -1,27 +1,42 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { Request } from 'express';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RefreshAuthGuard } from './guards/refresh-auth.guard';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import { Role } from "@prisma/client";
+import { Request } from "express";
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
-@Controller('auth')
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { RefreshAuthGuard } from "./guards/refresh-auth.guard";
+import { AuthService } from "./auth.service";
+import { LoginDto } from "./dto/login.dto";
+import { RegisterDto } from "./dto/register.dto";
+
+@Controller("auth")
+@ApiTags("auth")
+@ApiBadRequestResponse({ description: "Bad Request" })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
+  @Post("register")
+  @ApiOkResponse({ description: "Registrazione completata" })
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
-  @Post('login')
+  @Post("login")
+  @ApiOkResponse({ description: "Login completato" })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
-  @Post('refresh')
+  @Post("refresh")
+  @ApiBearerAuth("bearer")
+  @ApiUnauthorizedResponse({ description: "Unauthorized" })
+  @ApiOkResponse({ description: "Token refresh completato" })
   @UseGuards(RefreshAuthGuard)
   refresh(@Req() req: Request) {
     const user = req.user as {
@@ -39,7 +54,10 @@ export class AuthController {
     );
   }
 
-  @Post('logout')
+  @Post("logout")
+  @ApiBearerAuth("bearer")
+  @ApiUnauthorizedResponse({ description: "Unauthorized" })
+  @ApiOkResponse({ description: "Logout completato" })
   @UseGuards(JwtAuthGuard)
   logout(@Req() req: Request) {
     const user = req.user as { sub: string };

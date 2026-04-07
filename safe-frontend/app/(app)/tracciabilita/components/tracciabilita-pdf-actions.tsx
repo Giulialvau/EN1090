@@ -21,10 +21,18 @@ const PDFS: {
     label: "PDF fascicolo tecnico",
     fileHint: "fascicolo-tecnico",
   },
-  { tipo: "commessa", label: "PDF report commessa", fileHint: "report-commessa" },
+  {
+    tipo: "commessa",
+    label: "PDF report commessa",
+    fileHint: "report-commessa",
+  },
 ];
 
-export function TracciabilitaPdfActions({ commessaId }: { commessaId: string }) {
+export function TracciabilitaPdfActions({
+  commessaId,
+}: {
+  commessaId: string;
+}) {
   const [downloading, setDownloading] = useState<ReportPdfTipo | null>(null);
 
   const download = useCallback(
@@ -41,13 +49,13 @@ export function TracciabilitaPdfActions({ commessaId }: { commessaId: string }) 
         URL.revokeObjectURL(url);
       } catch (e) {
         window.alert(
-          e instanceof ApiError ? e.message : "Download PDF non riuscito."
+          e instanceof ApiError ? e.message : "Download PDF non riuscito.",
         );
       } finally {
         setDownloading(null);
       }
     },
-    [commessaId]
+    [commessaId],
   );
 
   return (

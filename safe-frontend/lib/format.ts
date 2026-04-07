@@ -16,7 +16,10 @@ export function daysUntil(iso?: string | null): number | null {
   return Math.ceil((d.getTime() - Date.now()) / 86400000);
 }
 
-export function isWithinDays(iso: string | undefined, maxDays: number): boolean {
+export function isWithinDays(
+  iso: string | undefined,
+  maxDays: number,
+): boolean {
   const d = daysUntil(iso);
   if (d === null) return false;
   return d >= 0 && d <= maxDays;

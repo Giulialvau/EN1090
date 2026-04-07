@@ -50,7 +50,9 @@ export default function LoginPage() {
         null;
 
       if (!accessToken) {
-        setError("Risposta login senza token. Controlla il formato del backend.");
+        setError(
+          "Risposta login senza token. Controlla il formato del backend.",
+        );
         return;
       }
 
@@ -58,7 +60,6 @@ export default function LoginPage() {
 
       // 🔥 Redirect sicuro (evita errori removeChild)
       router.push("/dashboard");
-
     } catch (err) {
       const msg =
         err instanceof ApiError
@@ -120,11 +121,13 @@ export default function LoginPage() {
       </div>
 
       <p className="mt-6 text-sm text-zinc-500">
-        <Link href="/" className="text-sky-700 hover:underline dark:text-sky-400">
+        <Link
+          href="/"
+          className="text-sky-700 hover:underline dark:text-sky-400"
+        >
           Torna alla home
         </Link>
       </p>
     </div>
   );
 }
-

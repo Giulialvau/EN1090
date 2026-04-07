@@ -7,7 +7,9 @@ type CommessaFilterBannerProps = {
   commessaId: string | null;
 };
 
-export function CommessaFilterBanner({ commessaId }: CommessaFilterBannerProps) {
+export function CommessaFilterBanner({
+  commessaId,
+}: CommessaFilterBannerProps) {
   const pathname = usePathname();
   if (!commessaId) return null;
 
@@ -17,8 +19,8 @@ export function CommessaFilterBanner({ commessaId }: CommessaFilterBannerProps) 
       role="status"
     >
       <span>
-        Vista filtrata per{" "}
-        <strong className="font-semibold">commessa</strong> (ID in URL).
+        Vista filtrata per <strong className="font-semibold">commessa</strong>{" "}
+        (ID in URL).
       </span>
       <Link
         href={pathname}

@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { NcStato, type Checklist, type Commessa } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { NcStato, type Checklist, type Commessa } from "@prisma/client";
+
+import { PrismaService } from "../prisma/prisma.service";
+
 import {
   applyTemplate,
   escapeHtml,
@@ -9,13 +11,13 @@ import {
   loadHtmlTemplate,
   renderHtmlToPdf,
   type RenderPdfOptions,
-} from './report-pdf.renderer';
+} from "./report-pdf.renderer";
 
 @Injectable()
 export class ReportPdfService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async commessaOrThrow(id: string): Promise<Commessa> {
+  private async commessaOrThrow(id: number): Promise<Commessa> {
     const c = await this.prisma.commessa.findUnique({ where: { id } });
     if (!c) {
       throw new NotFoundException(`Commessa ${id} non trovata`);
@@ -27,10 +29,10 @@ export class ReportPdfService {
     return {
       COMMESSA_CODICE: escapeHtml(c.codice),
       COMMESSA_CLIENTE: escapeHtml(c.cliente),
-      COMMESSA_TITOLO: escapeHtml(c.titolo ?? '—'),
-      COMMESSA_DESCRIZIONE: escapeHtml(c.descrizione ?? '—'),
-      COMMESSA_RESPONSABILE: escapeHtml(c.responsabile ?? '—'),
-      COMMESSA_LUOGO: escapeHtml(c.luogo ?? '—'),
+      COMMESSA_TITOLO: escapeHtml(c.titolo ?? "—"),
+      COMMESSA_DESCRIZIONE: escapeHtml(c.descrizione ?? "—"),
+      COMMESSA_RESPONSABILE: escapeHtml(c.responsabile ?? "—"),
+      COMMESSA_LUOGO: escapeHtml(c.luogo ?? "—"),
       COMMESSA_DATA_INIZIO: formatDateIt(c.dataInizio),
       COMMESSA_DATA_FINE: formatDateIt(c.dataFine),
       COMMESSA_STATO: escapeHtml(String(c.stato)),
@@ -48,28 +50,28 @@ export class ReportPdfService {
     return renderHtmlToPdf(html, pdfOptions);
   }
 
-  async dopPdf(commessaId: string): Promise<Uint8Array> {
+  async dopPdf(commessaId: number): Promise<Uint8Array> {
     const c = await this.commessaOrThrow(commessaId);
     const DOP_TESTO = escapeHtml(
-      'Il presente documento è generato automaticamente dai dati registrati nel sistema. ' +
-        'Verificare la conformità alla normativa vigente e completare i campi legali ove richiesto.',
+      "Il presente documento è generato automaticamente dai dati registrati nel sistema. " +
+        "Verificare la conformità alla normativa vigente e completare i campi legali ove richiesto.",
     );
-    return this.renderTemplate('dop.html', {
+    return this.renderTemplate("dop.html", {
       ...this.commessaVars(c),
-      DOC_TITLE: 'Dichiarazione di Prestazione (DoP)',
+      DOC_TITLE: "Dichiarazione di Prestazione (DoP)",
       DOP_TESTO,
     });
   }
 
-  async cePdf(commessaId: string): Promise<Uint8Array> {
+  async cePdf(commessaId: number): Promise<Uint8Array> {
     const c = await this.commessaOrThrow(commessaId);
     const CE_TESTO = escapeHtml(
-      'Il fascicolo tecnico e la tracciabilità devono essere coerenti con la marcatura CE applicata in officina. ' +
-        'Adattare alle procedure aziendali di marcatura e controllo.',
+      "Il fascicolo tecnico e la tracciabilità devono essere coerenti con la marcatura CE applicata in officina. " +
+        "Adattare alle procedure aziendali di marcatura e controllo.",
     );
-    return this.renderTemplate('ce.html', {
+    return this.renderTemplate("ce.html", {
       ...this.commessaVars(c),
-      DOC_TITLE: 'Marcatura CE',
+      DOC_TITLE: "Marcatura CE",
       CE_TESTO,
     });
   }
@@ -78,42 +80,33 @@ export class ReportPdfService {
    * Fascicolo Tecnico EN 1090 unico: copertina + DoP + CE + materiali + tracciabilità +
    * checklist + NC + audit + qualifiche + WPS/WPQR + riepilogo (HTML concatenato, un PDF).
    */
-  async fascicoloTecnicoPdf(commessaId: string): Promise<Uint8Array> {
+  async fascicoloTecnicoPdf(commessaId: number): Promise<Uint8Array> {
     const data = await this.prisma.commessa.findUnique({
       where: { id: commessaId },
       include: {
         materiali: {
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: {
             certificatoDocumento: { select: { nome: true, tipo: true } },
           },
         },
         tracciabilita: {
-          orderBy: { posizione: 'asc' },
+          orderBy: { posizione: "asc" },
           include: {
             materiale: { select: { codice: true, lotto: true } },
           },
         },
-        checklists: { orderBy: { titolo: 'asc' } },
-        nonConformita: { orderBy: { dataApertura: 'desc' } },
-        audits: { orderBy: { data: 'desc' } },
+        checklist: { orderBy: { titolo: "asc" } },
+        nonConformita: { orderBy: { dataApertura: "desc" } },
+        audits: { orderBy: { data: "desc" } },
         wps: {
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: { materiale: { select: { descrizione: true } } },
         },
         wpqr: {
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: {
             wps: { select: { codice: true } },
-            qualifica: {
-              select: {
-                id: true,
-                nome: true,
-                ruolo: true,
-                scadenza: true,
-                documento: true,
-              },
-            },
           },
         },
         _count: {
@@ -121,7 +114,7 @@ export class ReportPdfService {
             materiali: true,
             documenti: true,
             tracciabilita: true,
-            checklists: true,
+            checklist: true,
             nonConformita: true,
             audits: true,
             wps: true,
@@ -136,16 +129,16 @@ export class ReportPdfService {
 
     const base = this.commessaVars(data);
     const DOP_TESTO = escapeHtml(
-      'Il presente documento è generato automaticamente dai dati registrati nel sistema. ' +
-        'Verificare la conformità alla normativa vigente e completare i campi legali ove richiesto.',
+      "Il presente documento è generato automaticamente dai dati registrati nel sistema. " +
+        "Verificare la conformità alla normativa vigente e completare i campi legali ove richiesto.",
     );
     const CE_TESTO = escapeHtml(
-      'Il fascicolo tecnico e la tracciabilità devono essere coerenti con la marcatura CE applicata in officina. ' +
-        'Adattare alle procedure aziendali di marcatura e controllo.',
+      "Il fascicolo tecnico e la tracciabilità devono essere coerenti con la marcatura CE applicata in officina. " +
+        "Adattare alle procedure aziendali di marcatura e controllo.",
     );
     const RIEPILOGO_NOTA = escapeHtml(
-      'Per il dettaglio operativo utilizzare i singoli moduli EN 1090 del gestionale. ' +
-        'Questo fascicolo costituisce una sintesi ai fini della documentazione di costruzione.',
+      "Per il dettaglio operativo utilizzare i singoli moduli EN 1090 del gestionale. " +
+        "Questo fascicolo costituisce una sintesi ai fini della documentazione di costruzione.",
     );
 
     const MATERIALI_ROWS = this.buildMaterialiRows(data.materiali);
@@ -153,7 +146,9 @@ export class ReportPdfService {
       data.tracciabilita,
       data.codice,
     );
-    const CHECKLIST_CONTENT = this.fascicoloChecklistSectionsHtml(data.checklists);
+    const CHECKLIST_CONTENT = this.fascicoloChecklistSectionsHtml(
+      data.checklist,
+    );
     const NC_ROWS = this.buildNcRows(data.nonConformita);
     const AUDIT_ROWS = this.buildAuditRows(data.audits);
     const WPS_ROWS = this.buildWpsRows(data.wps);
@@ -166,7 +161,7 @@ export class ReportPdfService {
       COUNT_MATERIALI: String(cnt.materiali),
       COUNT_DOCUMENTI: String(cnt.documenti),
       COUNT_TRACCIABILITA: String(cnt.tracciabilita),
-      COUNT_CHECKLIST: String(cnt.checklists),
+      COUNT_CHECKLIST: String(cnt.checklist),
       COUNT_NC: String(cnt.nonConformita),
       COUNT_AUDIT: String(cnt.audits),
       COUNT_WPS: String(cnt.wps),
@@ -175,17 +170,17 @@ export class ReportPdfService {
     };
 
     const sectionFiles = [
-      'fascicolo/01-cover.html',
-      'fascicolo/02-dop.html',
-      'fascicolo/03-ce.html',
-      'fascicolo/04-materiali.html',
-      'fascicolo/05-tracciabilita.html',
-      'fascicolo/06-checklist.html',
-      'fascicolo/07-nc.html',
-      'fascicolo/08-audit.html',
-      'fascicolo/09-qualifiche.html',
-      'fascicolo/10-wps-wpqr.html',
-      'fascicolo/11-riepilogo.html',
+      "fascicolo/01-cover.html",
+      "fascicolo/02-dop.html",
+      "fascicolo/03-ce.html",
+      "fascicolo/04-materiali.html",
+      "fascicolo/05-tracciabilita.html",
+      "fascicolo/06-checklist.html",
+      "fascicolo/07-nc.html",
+      "fascicolo/08-audit.html",
+      "fascicolo/09-qualifiche.html",
+      "fascicolo/10-wps-wpqr.html",
+      "fascicolo/11-riepilogo.html",
     ] as const;
 
     const sectionVars: Record<string, string>[] = [
@@ -213,12 +208,15 @@ export class ReportPdfService {
     const bodyParts = sectionFiles.map((file, i) =>
       applyTemplate(loadHtmlTemplate(file), sectionVars[i]!),
     );
-    const body = bodyParts.join('\n');
+    const body = bodyParts.join("\n");
 
-    const html = applyTemplate(loadHtmlTemplate('fascicolo-tecnico-shell.html'), {
-      ...base,
-      BODY: body,
-    });
+    const html = applyTemplate(
+      loadHtmlTemplate("fascicolo-tecnico-shell.html"),
+      {
+        ...base,
+        BODY: body,
+      },
+    );
     return renderHtmlToPdf(html, {
       footerNote: `Generato il ${formatDateTimeIt(new Date())}`,
     });
@@ -243,11 +241,11 @@ export class ReportPdfService {
         const certNome = m.certificatoDocumento?.nome;
         const cert =
           certNome != null
-            ? `${escapeHtml(certNome)} (${escapeHtml(m.certificatoDocumento?.tipo ?? '')})`
-            : '—';
-        return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? '—')}</td><td>${escapeHtml(m.fornitore ?? '—')}</td><td>${escapeHtml(m.norma ?? '—')}</td><td>${escapeHtml(m.certificato31 ?? '—')}</td><td>${cert}</td></tr>`;
+            ? `${escapeHtml(certNome)} (${escapeHtml(m.certificatoDocumento?.tipo ?? "")})`
+            : "—";
+        return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? "—")}</td><td>${escapeHtml(m.fornitore ?? "—")}</td><td>${escapeHtml(m.norma ?? "—")}</td><td>${escapeHtml(m.certificato31 ?? "—")}</td><td>${cert}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private buildTracciabilitaRows(
@@ -267,9 +265,9 @@ export class ReportPdfService {
     return rows
       .map((r) => {
         const mc = r.materiale;
-        return `<tr><td>${escapeHtml(mc?.codice ?? '—')}</td><td>${escapeHtml(mc?.lotto ?? '—')}</td><td>${escapeHtml(r.descrizioneComponente ?? '—')}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td><td>${code}</td><td>${escapeHtml(r.riferimentoDisegno ?? '—')}</td></tr>`;
+        return `<tr><td>${escapeHtml(mc?.codice ?? "—")}</td><td>${escapeHtml(mc?.lotto ?? "—")}</td><td>${escapeHtml(r.descrizioneComponente ?? "—")}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td><td>${code}</td><td>${escapeHtml(r.riferimentoDisegno ?? "—")}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private elementiTableRows(elementi: unknown): string {
@@ -279,9 +277,9 @@ export class ReportPdfService {
     return elementi
       .map((e, i) => {
         const o = e as Record<string, unknown>;
-        return `<tr><td>${i + 1}</td><td>${escapeHtml(String(o.descrizione ?? ''))}</td><td>${o.completato ? 'Sì' : 'No'}</td><td>${escapeHtml(String(o.risposta ?? '—'))}</td><td>${escapeHtml(String(o.note ?? '—'))}</td></tr>`;
+        return `<tr><td>${i + 1}</td><td>${escapeHtml(String(o.descrizione ?? ""))}</td><td>${o.completato ? "Sì" : "No"}</td><td>${escapeHtml(String(o.risposta ?? "—"))}</td><td>${escapeHtml(String(o.note ?? "—"))}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private fascicoloChecklistSectionsHtml(checklists: Checklist[]): string {
@@ -293,17 +291,17 @@ export class ReportPdfService {
         const elRows = this.elementiTableRows(cl.elementi);
         const noteBlock = cl.note
           ? `<p class="note">${escapeHtml(cl.note)}</p>`
-          : '';
+          : "";
         return `
       <h3 class="sub-sec">${escapeHtml(cl.titolo)}</h3>
-      <p style="font-size:9pt;">Categoria: ${escapeHtml(cl.categoria)} | Fase: ${escapeHtml(cl.fase ?? '—')} | Stato: ${escapeHtml(String(cl.stato))} | Esito: ${cl.esito ? escapeHtml(String(cl.esito)) : '—'}</p>
+      <p style="font-size:9pt;">Categoria: ${escapeHtml(cl.categoria)} | Fase: ${escapeHtml(cl.fase ?? "—")} | Stato: ${escapeHtml(String(cl.stato))} | Esito: ${cl.esito ? escapeHtml(String(cl.esito)) : "—"}</p>
       ${noteBlock}
       <table class="grid">
         <thead><tr><th>#</th><th>Punto controllo</th><th>Completato</th><th>Risposta</th><th>Note</th></tr></thead>
         <tbody>${elRows}</tbody>
       </table>`;
       })
-      .join('');
+      .join("");
   }
 
   private buildNcRows(
@@ -312,7 +310,7 @@ export class ReportPdfService {
       stato: unknown;
       gravita: unknown;
       dataApertura: Date;
-      azioniCorrettive: string | null;
+      azione: string | null;
     }>,
   ): string {
     if (rows.length === 0) {
@@ -321,9 +319,9 @@ export class ReportPdfService {
     return rows
       .map(
         (n) =>
-          `<tr><td>${escapeHtml(n.titolo)}</td><td>${escapeHtml(String(n.stato))}</td><td>${escapeHtml(String(n.gravita))}</td><td>${formatDateIt(n.dataApertura)}</td><td>${escapeHtml((n.azioniCorrettive ?? '—').slice(0, 240))}</td></tr>`,
+          `<tr><td>${escapeHtml(n.titolo)}</td><td>${escapeHtml(String(n.stato))}</td><td>${escapeHtml(String(n.gravita))}</td><td>${formatDateIt(n.dataApertura)}</td><td>${escapeHtml((n.azione ?? "—").slice(0, 240))}</td></tr>`,
       )
-      .join('');
+      .join("");
   }
 
   private buildAuditRows(
@@ -341,9 +339,9 @@ export class ReportPdfService {
     return rows
       .map(
         (a) =>
-          `<tr><td>${escapeHtml(a.titolo)}</td><td>${formatDateIt(a.data)}</td><td>${escapeHtml(a.auditor)}</td><td>${escapeHtml(String(a.esito))}</td><td>${escapeHtml((a.note ?? '—').slice(0, 140))}</td></tr>`,
+          `<tr><td>${escapeHtml(a.titolo)}</td><td>${formatDateIt(a.data)}</td><td>${escapeHtml(a.auditor)}</td><td>${escapeHtml(String(a.esito))}</td><td>${escapeHtml((a.note ?? "—").slice(0, 140))}</td></tr>`,
       )
-      .join('');
+      .join("");
   }
 
   private buildWpsRows(
@@ -361,9 +359,9 @@ export class ReportPdfService {
     return rows
       .map(
         (w) =>
-          `<tr><td>${escapeHtml(w.codice)}</td><td>${escapeHtml(w.processo)}</td><td>${escapeHtml(w.materialeBase ?? w.materiale?.descrizione ?? '—')}</td><td>${formatDateIt(w.scadenza)}</td></tr>`,
+          `<tr><td>${escapeHtml(w.codice)}</td><td>${escapeHtml(w.processo)}</td><td>${escapeHtml(w.materialeBase ?? w.materiale?.descrizione ?? "—")}</td><td>${formatDateIt(w.scadenza)}</td></tr>`,
       )
-      .join('');
+      .join("");
   }
 
   private buildWpqrRows(
@@ -373,7 +371,6 @@ export class ReportPdfService {
       dataQualifica: Date;
       scadenza: Date | null;
       wps: { codice: string } | null;
-      qualifica: { nome: string } | null;
     }>,
   ): string {
     if (rows.length === 0) {
@@ -381,54 +378,45 @@ export class ReportPdfService {
     }
     return rows
       .map((q) => {
-        const wpsC = q.wps?.codice ?? '—';
-        const qual = q.qualifica?.nome ?? '—';
-        return `<tr><td>${escapeHtml(q.codice)}</td><td>${escapeHtml(q.saldatore)}</td><td>${escapeHtml(wpsC)}</td><td>${formatDateIt(q.dataQualifica)}</td><td>${formatDateIt(q.scadenza)}</td><td>${escapeHtml(qual)}</td></tr>`;
+        const wpsC = q.wps?.codice ?? "—";
+        return `<tr><td>${escapeHtml(q.codice)}</td><td>${escapeHtml(q.saldatore)}</td><td>${escapeHtml(wpsC)}</td><td>${formatDateIt(q.dataQualifica)}</td><td>${formatDateIt(q.scadenza)}</td><td>—</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private buildQualificheDistinctRows(
     wpqr: Array<{
-      qualifica: {
-        id: string;
-        nome: string;
-        ruolo: string;
-        scadenza: Date | null;
-        documento: string | null;
-      } | null;
+      saldatore: string;
+      dataQualifica: Date;
+      scadenza: Date | null;
     }>,
   ): string {
-    const map = new Map<
-      string,
-      { nome: string; ruolo: string; scadenza: Date | null; documento: string | null }
-    >();
+    if (wpqr.length === 0) {
+      return '<tr><td colspan="4">Nessun WPQR registrato.</td></tr>';
+    }
+    // Non esiste più il modello Qualifica: riportiamo una sintesi dei saldatori da WPQR.
+    const map = new Map<string, { scadenza: Date | null; ultimo: Date }>();
     for (const w of wpqr) {
-      if (w.qualifica) {
-        map.set(w.qualifica.id, {
-          nome: w.qualifica.nome,
-          ruolo: w.qualifica.ruolo,
-          scadenza: w.qualifica.scadenza,
-          documento: w.qualifica.documento,
-        });
+      const key = (w.saldatore ?? "").trim() || "—";
+      const prev = map.get(key);
+      const ultimo = w.dataQualifica;
+      if (!prev || prev.ultimo < ultimo) {
+        map.set(key, { scadenza: w.scadenza, ultimo });
       }
     }
-    if (map.size === 0) {
-      return '<tr><td colspan="4">Nessuna qualifica anagrafica collegata ai WPQR.</td></tr>';
-    }
-    return [...map.values()]
-      .map(
-        (q) =>
-          `<tr><td>${escapeHtml(q.nome)}</td><td>${escapeHtml(q.ruolo)}</td><td>${formatDateIt(q.scadenza)}</td><td>${escapeHtml(q.documento ?? '—')}</td></tr>`,
-      )
-      .join('');
+    return [...map.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, v]) => {
+        return `<tr><td>${escapeHtml(name)}</td><td>WPQR</td><td>${formatDateIt(v.scadenza)}</td><td>—</td></tr>`;
+      })
+      .join("");
   }
 
-  async materialiPdf(commessaId: string): Promise<Uint8Array> {
+  async materialiPdf(commessaId: number): Promise<Uint8Array> {
     const c = await this.commessaOrThrow(commessaId);
     const materiali = await this.prisma.materiale.findMany({
       where: { commessaId },
-      orderBy: { codice: 'asc' },
+      orderBy: { codice: "asc" },
       include: {
         certificatoDocumento: {
           select: { nome: true, tipo: true },
@@ -443,27 +431,27 @@ export class ReportPdfService {
               const certNome = m.certificatoDocumento?.nome;
               const cert =
                 certNome != null
-                  ? `${escapeHtml(certNome)} (${escapeHtml(m.certificatoDocumento?.tipo ?? '')})`
-                  : '—';
-              return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? '—')}</td><td>${escapeHtml(m.fornitore ?? '—')}</td><td>${escapeHtml(m.norma ?? '—')}</td><td>${escapeHtml(m.certificato31 ?? '—')}</td><td>${cert}</td></tr>`;
+                  ? `${escapeHtml(certNome)} (${escapeHtml(m.certificatoDocumento?.tipo ?? "")})`
+                  : "—";
+              return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? "—")}</td><td>${escapeHtml(m.fornitore ?? "—")}</td><td>${escapeHtml(m.norma ?? "—")}</td><td>${escapeHtml(m.certificato31 ?? "—")}</td><td>${cert}</td></tr>`;
             })
-            .join('');
-    return this.renderTemplate('materiali.html', {
+            .join("");
+    return this.renderTemplate("materiali.html", {
       ...this.commessaVars(c),
-      DOC_TITLE: 'Report materiali',
+      DOC_TITLE: "Report materiali",
       TOTAL_MATERIALI: String(materiali.length),
       MATERIALI_ROWS,
     });
   }
 
-  async tracciabilitaPdf(commessaId: string): Promise<Uint8Array> {
+  async tracciabilitaPdf(commessaId: number): Promise<Uint8Array> {
     const c = await this.commessaOrThrow(commessaId);
     const rows = await this.prisma.tracciabilita.findMany({
       where: { commessaId },
       include: {
         materiale: { select: { codice: true, lotto: true } },
       },
-      orderBy: { posizione: 'asc' },
+      orderBy: { posizione: "asc" },
     });
     const code = escapeHtml(c.codice);
     const TRACCIABILITA_ROWS =
@@ -472,12 +460,12 @@ export class ReportPdfService {
         : rows
             .map((r) => {
               const mc = r.materiale;
-              return `<tr><td>${escapeHtml(mc?.codice ?? '—')}</td><td>${escapeHtml(mc?.lotto ?? '—')}</td><td>${escapeHtml(r.descrizioneComponente ?? '—')}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td><td>${code}</td><td>${escapeHtml(r.riferimentoDisegno ?? '—')}</td></tr>`;
+              return `<tr><td>${escapeHtml(mc?.codice ?? "—")}</td><td>${escapeHtml(mc?.lotto ?? "—")}</td><td>${escapeHtml(r.descrizioneComponente ?? "—")}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td><td>${code}</td><td>${escapeHtml(r.riferimentoDisegno ?? "—")}</td></tr>`;
             })
-            .join('');
-    return this.renderTemplate('tracciabilita.html', {
+            .join("");
+    return this.renderTemplate("tracciabilita.html", {
       ...this.commessaVars(c),
-      DOC_TITLE: 'Report tracciabilità',
+      DOC_TITLE: "Report tracciabilità",
       TOTAL_RECORDS: String(rows.length),
       TRACCIABILITA_ROWS,
     });
@@ -490,28 +478,28 @@ export class ReportPdfService {
     return checklists
       .map((cl) => {
         const sum = this.elementiSummary(cl.elementi);
-        return `<tr><td>${escapeHtml(cl.titolo)}</td><td>${escapeHtml(String(cl.stato))}</td><td>${escapeHtml(cl.esito != null ? String(cl.esito) : '—')}</td><td>${escapeHtml(cl.note ?? '—')}</td><td>${sum}</td></tr>`;
+        return `<tr><td>${escapeHtml(cl.titolo)}</td><td>${escapeHtml(String(cl.stato))}</td><td>${escapeHtml(cl.esito != null ? String(cl.esito) : "—")}</td><td>${escapeHtml(cl.note ?? "—")}</td><td>${sum}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private elementiSummary(elementi: unknown): string {
-    if (!Array.isArray(elementi)) return '—';
+    if (!Array.isArray(elementi)) return "—";
     const parts: string[] = [];
     for (let i = 0; i < Math.min(elementi.length, 6); i++) {
       const o = elementi[i] as Record<string, unknown>;
-      parts.push(String(o.descrizione ?? ''));
+      parts.push(String(o.descrizione ?? ""));
     }
-    const s = parts.filter(Boolean).join(' · ');
+    const s = parts.filter(Boolean).join(" · ");
     const out = s.length > 280 ? `${s.slice(0, 280)}…` : s;
-    return escapeHtml(out || '—');
+    return escapeHtml(out || "—");
   }
 
   /**
    * Report Commessa avanzato — GET /report/commessa?commessaId=
    * Workflow EN 1090, tabelle sintetiche, grafico a barre (SVG), footer con data.
    */
-  async commessaCompletoPdf(commessaId: string): Promise<Uint8Array> {
+  async commessaCompletoPdf(commessaId: number): Promise<Uint8Array> {
     const data = await this.prisma.commessa.findUnique({
       where: { id: commessaId },
       include: {
@@ -520,7 +508,7 @@ export class ReportPdfService {
             materiali: true,
             documenti: true,
             nonConformita: true,
-            checklists: true,
+            checklist: true,
             audits: true,
             wps: true,
             wpqr: true,
@@ -530,38 +518,29 @@ export class ReportPdfService {
         },
         materiali: {
           take: 15,
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: {
             certificatoDocumento: { select: { nome: true, tipo: true } },
           },
         },
         tracciabilita: {
           take: 20,
-          orderBy: { posizione: 'asc' },
+          orderBy: { posizione: "asc" },
           include: {
             materiale: { select: { codice: true, lotto: true } },
           },
         },
-        checklists: { take: 12, orderBy: { titolo: 'asc' } },
-        nonConformita: { take: 15, orderBy: { dataApertura: 'desc' } },
-        audits: { take: 12, orderBy: { data: 'desc' } },
+        checklist: { take: 12, orderBy: { titolo: "asc" } },
+        nonConformita: { take: 15, orderBy: { dataApertura: "desc" } },
+        audits: { take: 12, orderBy: { data: "desc" } },
         wps: {
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: { materiale: { select: { descrizione: true } } },
         },
         wpqr: {
-          orderBy: { codice: 'asc' },
+          orderBy: { codice: "asc" },
           include: {
             wps: { select: { codice: true } },
-            qualifica: {
-              select: {
-                id: true,
-                nome: true,
-                ruolo: true,
-                scadenza: true,
-                documento: true,
-              },
-            },
           },
         },
       },
@@ -582,37 +561,39 @@ export class ReportPdfService {
 
     const cnt = data._count;
     const overview = Boolean(
-      String(data.codice ?? '').trim() && String(data.cliente ?? '').trim(),
+      String(data.codice ?? "").trim() && String(data.cliente ?? "").trim(),
     );
     const workflowPhases: Array<{ label: string; ok: boolean; note: string }> =
       [
         {
-          label: 'Anagrafica commessa',
+          label: "Anagrafica commessa",
           ok: overview,
-          note: overview ? 'Codice e cliente valorizzati' : 'Completare dati obbligatori',
+          note: overview
+            ? "Codice e cliente valorizzati"
+            : "Completare dati obbligatori",
         },
         {
-          label: 'Materiali',
+          label: "Materiali",
           ok: cnt.materiali > 0,
           note: `${cnt.materiali} lotti registrati`,
         },
         {
-          label: 'Documenti',
+          label: "Documenti",
           ok: cnt.documenti > 0,
           note: `${cnt.documenti} documenti`,
         },
         {
-          label: 'Checklist',
-          ok: cnt.checklists > 0,
-          note: `${cnt.checklists} checklist`,
+          label: "Checklist",
+          ok: cnt.checklist > 0,
+          note: `${cnt.checklist} checklist`,
         },
         {
-          label: 'Tracciabilità',
+          label: "Tracciabilità",
           ok: cnt.tracciabilita > 0,
           note: `${cnt.tracciabilita} record`,
         },
         {
-          label: 'Non conformità (nessuna aperta)',
+          label: "Non conformità (nessuna aperta)",
           ok: ncAperteDb === 0,
           note:
             ncAperteDb === 0
@@ -620,29 +601,29 @@ export class ReportPdfService {
               : `${ncAperteDb} NC aperte`,
         },
         {
-          label: 'WPS / WPQR',
+          label: "WPS / WPQR",
           ok: cnt.wps > 0 && cnt.wpqr > 0,
           note: `${cnt.wps} WPS, ${cnt.wpqr} WPQR`,
         },
         {
-          label: 'Qualifiche saldatori (WPQR)',
+          label: "Qualifiche saldatori (WPQR)",
           ok: cnt.wpqr > 0,
           note: `${cnt.wpqr} WPQR collegati`,
         },
         {
-          label: 'Audit FPC',
+          label: "Audit FPC",
           ok: cnt.audits > 0,
           note: `${cnt.audits} audit`,
         },
         {
-          label: 'Piani di controllo',
+          label: "Piani di controllo",
           ok: cnt.pianiControllo > 0,
           note: `${cnt.pianiControllo} piani`,
         },
         {
-          label: 'Report / fascicolo dati',
+          label: "Report / fascicolo dati",
           ok: true,
-          note: 'Dati commessa disponibili nel sistema',
+          note: "Dati commessa disponibili nel sistema",
         },
       ];
 
@@ -653,16 +634,18 @@ export class ReportPdfService {
     const WORKFLOW_ROWS = workflowPhases
       .map(
         (p) =>
-          `<tr><td>${escapeHtml(p.label)}</td><td>${p.ok ? 'Sì' : 'No'}</td><td>${escapeHtml(p.note)}</td></tr>`,
+          `<tr><td>${escapeHtml(p.label)}</td><td>${p.ok ? "Sì" : "No"}</td><td>${escapeHtml(p.note)}</td></tr>`,
       )
-      .join('');
+      .join("");
     const WORKFLOW_CHART_SVG = this.buildWorkflowBarChartSvg(
       workflowPhases.map(({ label, ok }) => ({ label, ok })),
     );
 
     const MATERIALI_ROWS = this.buildMaterialiRowsReport(data.materiali);
-    const TRACCIABILITA_ROWS = this.buildTracciabilitaRowsShort(data.tracciabilita);
-    const CHECKLIST_ROWS = this.checklistRowsReportShort(data.checklists);
+    const TRACCIABILITA_ROWS = this.buildTracciabilitaRowsShort(
+      data.tracciabilita,
+    );
+    const CHECKLIST_ROWS = this.checklistRowsReportShort(data.checklist);
 
     const NC_ROWS =
       data.nonConformita.length === 0
@@ -672,7 +655,7 @@ export class ReportPdfService {
               (n) =>
                 `<tr><td>${escapeHtml(n.titolo)}</td><td>${escapeHtml(String(n.stato))}</td><td>${escapeHtml(String(n.gravita))}</td><td>${formatDateIt(n.dataApertura)}</td></tr>`,
             )
-            .join('');
+            .join("");
 
     const AUDIT_ROWS =
       data.audits.length === 0
@@ -680,9 +663,9 @@ export class ReportPdfService {
         : data.audits
             .map(
               (a) =>
-                `<tr><td>${escapeHtml(a.titolo)}</td><td>${formatDateIt(a.data)}</td><td>${escapeHtml(a.auditor)}</td><td>${escapeHtml(String(a.esito))}</td><td>${escapeHtml((a.note ?? '—').slice(0, 100))}</td></tr>`,
+                `<tr><td>${escapeHtml(a.titolo)}</td><td>${formatDateIt(a.data)}</td><td>${escapeHtml(a.auditor)}</td><td>${escapeHtml(String(a.esito))}</td><td>${escapeHtml((a.note ?? "—").slice(0, 100))}</td></tr>`,
             )
-            .join('');
+            .join("");
 
     const WPS_ROWS = this.buildWpsRows(data.wps);
     const WPQR_ROWS = this.buildWpqrRows(data.wpqr);
@@ -690,7 +673,7 @@ export class ReportPdfService {
 
     const gen = formatDateTimeIt(new Date());
     return this.renderTemplate(
-      'report-commessa.html',
+      "report-commessa.html",
       {
         ...this.commessaVars(data),
         GENERATO_IL: gen,
@@ -713,14 +696,14 @@ export class ReportPdfService {
         COUNT_MATERIALI: String(cnt.materiali),
         COUNT_DOCUMENTI: String(cnt.documenti),
         COUNT_TRACCIABILITA: String(cnt.tracciabilita),
-        COUNT_CHECKLIST: String(cnt.checklists),
+        COUNT_CHECKLIST: String(cnt.checklist),
         COUNT_NC: String(cnt.nonConformita),
         COUNT_AUDIT: String(cnt.audits),
         COUNT_WPS: String(cnt.wps),
         COUNT_WPQR: String(cnt.wpqr),
         COUNT_PIANI: String(cnt.pianiControllo),
         REPORT_FOOTER_NOTE: escapeHtml(
-          'Le NC in tabella sono un estratto (max 15). I totali aperte/chiuse si riferiscono all’intera commessa.',
+          "Le NC in tabella sono un estratto (max 15). I totali aperte/chiuse si riferiscono all’intera commessa.",
         ),
       },
       { footerNote: `Generato il ${gen}` },
@@ -740,7 +723,7 @@ export class ReportPdfService {
     phases.forEach((p, i) => {
       const y = startY + i * rowH;
       const barW = p.ok ? 180 : 72;
-      const fill = p.ok ? '#2d7a4e' : '#c5c5c5';
+      const fill = p.ok ? "#2d7a4e" : "#c5c5c5";
       const lab = p.label.length > 38 ? `${p.label.slice(0, 36)}…` : p.label;
       parts.push(
         `<text x="6" y="${y + 12}" font-size="8.5" font-family="Arial,Helvetica,sans-serif">${escapeHtml(lab)}</text>`,
@@ -749,10 +732,10 @@ export class ReportPdfService {
         `<rect x="200" y="${y}" width="${barW}" height="14" fill="${fill}" rx="2"/>`,
       );
       parts.push(
-        `<text x="392" y="${y + 12}" font-size="8.5" font-family="Arial,Helvetica,sans-serif">${p.ok ? 'OK' : '—'}</text>`,
+        `<text x="392" y="${y + 12}" font-size="8.5" font-family="Arial,Helvetica,sans-serif">${p.ok ? "OK" : "—"}</text>`,
       );
     });
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${parts.join('')}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${parts.join("")}</svg>`;
   }
 
   private buildMaterialiRowsReport(
@@ -772,10 +755,10 @@ export class ReportPdfService {
       .map((m) => {
         const cert = m.certificatoDocumento?.nome
           ? escapeHtml(m.certificatoDocumento.nome)
-          : '—';
-        return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? '—')}</td><td>${escapeHtml(m.fornitore ?? '—')}</td><td>${escapeHtml(m.norma ?? '—')}</td><td>${cert}</td></tr>`;
+          : "—";
+        return `<tr><td>${escapeHtml(m.codice)}</td><td>${escapeHtml(m.descrizione)}</td><td>${escapeHtml(m.lotto ?? "—")}</td><td>${escapeHtml(m.fornitore ?? "—")}</td><td>${escapeHtml(m.norma ?? "—")}</td><td>${cert}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private buildTracciabilitaRowsShort(
@@ -792,9 +775,9 @@ export class ReportPdfService {
     return rows
       .map((r) => {
         const mc = r.materiale;
-        return `<tr><td>${escapeHtml(mc?.codice ?? '—')}</td><td>${escapeHtml(mc?.lotto ?? '—')}</td><td>${escapeHtml(r.descrizioneComponente ?? '—')}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td></tr>`;
+        return `<tr><td>${escapeHtml(mc?.codice ?? "—")}</td><td>${escapeHtml(mc?.lotto ?? "—")}</td><td>${escapeHtml(r.descrizioneComponente ?? "—")}</td><td>${escapeHtml(r.posizione)}</td><td>${escapeHtml(String(r.quantita))}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 
   private checklistRowsReportShort(checklists: Checklist[]): string {
@@ -806,8 +789,8 @@ export class ReportPdfService {
         const cat = cl.fase
           ? `${escapeHtml(cl.categoria)} / ${escapeHtml(cl.fase)}`
           : escapeHtml(cl.categoria);
-        return `<tr><td>${escapeHtml(cl.titolo)}</td><td>${escapeHtml(String(cl.stato))}</td><td>${escapeHtml(cl.esito != null ? String(cl.esito) : '—')}</td><td>${cat}</td><td>${escapeHtml((cl.note ?? '—').slice(0, 100))}</td></tr>`;
+        return `<tr><td>${escapeHtml(cl.titolo)}</td><td>${escapeHtml(String(cl.stato))}</td><td>${escapeHtml(cl.esito != null ? String(cl.esito) : "—")}</td><td>${cat}</td><td>${escapeHtml((cl.note ?? "—").slice(0, 100))}</td></tr>`;
       })
-      .join('');
+      .join("");
   }
 }

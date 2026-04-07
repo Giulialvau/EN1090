@@ -57,7 +57,10 @@ export default function PianoControlloDetailPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm text-zinc-500">
-          <Link href="/piani-controllo" className="text-sky-700 hover:underline">
+          <Link
+            href="/piani-controllo"
+            className="text-sky-700 hover:underline"
+          >
             Piani di controllo
           </Link>{" "}
           / {String(row.titolo ?? id)}
@@ -68,7 +71,10 @@ export default function PianoControlloDetailPage() {
         {cid ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Commessa:{" "}
-            <Link className="text-sky-700 hover:underline" href={`/commesse/${cid}`}>
+            <Link
+              className="text-sky-700 hover:underline"
+              href={`/commesse/${cid}`}
+            >
               {String(comm?.codice ?? cid)}
             </Link>
           </p>
@@ -78,20 +84,30 @@ export default function PianoControlloDetailPage() {
       <Card title="Controlli ed esito">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Fase</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Fase
+            </dt>
             <dd>{String(row.fase ?? row.fasi ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Stato</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Stato
+            </dt>
             <dd>{String(row.stato ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Esito</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Esito
+            </dt>
             <dd>{String(row.esito ?? "—")}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium uppercase text-zinc-500">Controlli</dt>
-            <dd className="whitespace-pre-wrap">{String(row.controlli ?? "—")}</dd>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Controlli
+            </dt>
+            <dd className="whitespace-pre-wrap">
+              {String(row.controlli ?? "—")}
+            </dd>
           </div>
         </dl>
       </Card>

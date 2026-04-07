@@ -46,16 +46,16 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<Record<string, unknown> | null>(
-    null
+    null,
   );
   const [fornitori, setFornitori] = useState<unknown>(null);
   const [commessaReportId, setCommessaReportId] = useState("");
   const [commessaReportJson, setCommessaReportJson] = useState<string | null>(
-    null
+    null,
   );
   const [loadingCommessaReport, setLoadingCommessaReport] = useState(false);
   const [pdfDownloading, setPdfDownloading] = useState<ReportPdfTipo | null>(
-    null
+    null,
   );
 
   const load = useCallback(async () => {
@@ -68,12 +68,12 @@ export default function ReportPage() {
       setDashboard(
         dash && typeof dash === "object"
           ? (dash as Record<string, unknown>)
-          : null
+          : null,
       );
       setFornitori(matForn);
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento reportistica"
+        e instanceof ApiError ? e.message : "Errore caricamento reportistica",
       );
     } finally {
       setLoading(false);
@@ -97,7 +97,7 @@ export default function ReportPage() {
       setCommessaReportJson(JSON.stringify(raw, null, 2));
     } catch (e) {
       window.alert(
-        e instanceof ApiError ? e.message : "Errore report commessa"
+        e instanceof ApiError ? e.message : "Errore report commessa",
       );
     } finally {
       setLoadingCommessaReport(false);
@@ -123,13 +123,13 @@ export default function ReportPage() {
         URL.revokeObjectURL(url);
       } catch (e) {
         window.alert(
-          e instanceof ApiError ? e.message : "Download PDF non riuscito."
+          e instanceof ApiError ? e.message : "Download PDF non riuscito.",
         );
       } finally {
         setPdfDownloading(null);
       }
     },
-    [commessaReportId]
+    [commessaReportId],
   );
 
   return (
@@ -143,16 +143,15 @@ export default function ReportPage() {
           </Button>
         }
       >
-        {error ? (
-          <p className="mb-4 text-sm text-red-600">{error}</p>
-        ) : null}
+        {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
         {loading ? (
           <p className="text-sm text-zinc-500">Caricamento…</p>
         ) : (
           <div className="space-y-6">
             <div>
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                Dashboard (<code className="text-xs">GET /report/dashboard</code>)
+                Dashboard (
+                <code className="text-xs">GET /report/dashboard</code>)
               </h3>
               {dashboard ? (
                 <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-950">
@@ -168,7 +167,8 @@ export default function ReportPage() {
             <div>
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                 Materiali per fornitore (
-                <code className="text-xs">GET /report/materiali/fornitori</code>)
+                <code className="text-xs">GET /report/materiali/fornitori</code>
+                )
               </h3>
               {fornitori != null ? (
                 <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-950">
@@ -250,7 +250,10 @@ export default function ReportPage() {
         </div>
       </Card>
 
-      <Card title="Tipologie di report" description="Sezioni previste dalla gestione qualità">
+      <Card
+        title="Tipologie di report"
+        description="Sezioni previste dalla gestione qualità"
+      >
         <ul className="list-inside list-disc space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
           <li>Report commessa: stato avanzamento, documenti, NC collegate.</li>
           <li>Report materiali: certificati 3.1 e tracciabilità lotti.</li>

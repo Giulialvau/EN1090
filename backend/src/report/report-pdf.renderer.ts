@@ -1,16 +1,17 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import puppeteer from 'puppeteer';
+import { readFileSync } from "fs";
+import { join } from "path";
+
+import puppeteer from "puppeteer";
 
 /** Carica template HTML da dist/report/templates (build) o src (dev ts-node) */
 export function loadHtmlTemplate(filename: string): string {
   const candidates = [
-    join(__dirname, 'templates', filename),
-    join(process.cwd(), 'src', 'report', 'templates', filename),
+    join(__dirname, "templates", filename),
+    join(process.cwd(), "src", "report", "templates", filename),
   ];
   for (const p of candidates) {
     try {
-      return readFileSync(p, 'utf-8');
+      return readFileSync(p, "utf-8");
     } catch {
       /* try next */
     }
@@ -19,32 +20,30 @@ export function loadHtmlTemplate(filename: string): string {
 }
 
 export function escapeHtml(s: string | null | undefined): string {
-  if (s == null) return '';
+  if (s == null) return "";
   return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-export function formatDateIt(
-  d: Date | string | null | undefined,
-): string {
-  if (d == null) return '—';
+export function formatDateIt(d: Date | string | null | undefined): string {
+  if (d == null) return "—";
   const x = d instanceof Date ? d : new Date(d);
-  if (Number.isNaN(x.getTime())) return '—';
-  return x.toLocaleDateString('it-IT', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+  if (Number.isNaN(x.getTime())) return "—";
+  return x.toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 }
 
 export function formatDateTimeIt(d: Date | string | null | undefined): string {
-  if (d == null) return '—';
+  if (d == null) return "—";
   const x = d instanceof Date ? d : new Date(d);
-  if (Number.isNaN(x.getTime())) return '—';
-  return x.toLocaleString('it-IT');
+  if (Number.isNaN(x.getTime())) return "—";
+  return x.toLocaleString("it-IT");
 }
 
 /**
@@ -90,28 +89,28 @@ export async function renderHtmlToPdf(
   const browser = await puppeteer.launch({
     headless: true,
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
     ],
   });
   try {
     const page = await browser.newPage();
     await page.setContent(html, {
-      waitUntil: 'load',
+      waitUntil: "load",
       timeout: 120_000,
     });
     const buf = await page.pdf({
-      format: 'A4',
+      format: "A4",
       printBackground: true,
       margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '22mm',
-        left: '20mm',
+        top: "20mm",
+        right: "20mm",
+        bottom: "22mm",
+        left: "20mm",
       },
       displayHeaderFooter: true,
-      headerTemplate: '<div></div>',
+      headerTemplate: "<div></div>",
       footerTemplate: buildFooterTemplate(options),
     });
     return new Uint8Array(buf);

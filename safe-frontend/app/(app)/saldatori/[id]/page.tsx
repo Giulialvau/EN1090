@@ -51,13 +51,13 @@ export default function SaldatoreDetailPage() {
         scadenza: toIn(
           (raw.scadenza as string | undefined) ??
             (raw.dataScadenza as string | undefined) ??
-            (raw.data_scadenza as string | undefined)
+            (raw.data_scadenza as string | undefined),
         ),
         documento: String(raw.documento ?? raw.documentoUrl ?? ""),
       });
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento qualifica"
+        e instanceof ApiError ? e.message : "Errore caricamento qualifica",
       );
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ export default function SaldatoreDetailPage() {
       await load();
     } catch (err) {
       setSaveError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -104,7 +104,7 @@ export default function SaldatoreDetailPage() {
       router.replace("/saldatori");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -147,11 +147,16 @@ export default function SaldatoreDetailPage() {
             {formatDate(
               (row.scadenza as string | undefined) ??
                 (row.dataScadenza as string | undefined) ??
-                (row.data_scadenza as string | undefined)
+                (row.data_scadenza as string | undefined),
             ) || "—"}
           </p>
         </div>
-        <Button type="button" variant="ghost" className="text-red-700" onClick={() => void remove()}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-red-700"
+          onClick={() => void remove()}
+        >
           Elimina
         </Button>
       </div>
@@ -161,7 +166,9 @@ export default function SaldatoreDetailPage() {
       <Card title="Modifica anagrafica" description="PATCH /qualifiche/:id">
         <form className="space-y-4" onSubmit={save}>
           {saveError ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {saveError}
+            </p>
           ) : null}
           <QualificaFormFields form={form} setForm={setForm} />
           <Button type="submit" disabled={saving}>

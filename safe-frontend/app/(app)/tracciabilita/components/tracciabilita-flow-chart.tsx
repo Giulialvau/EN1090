@@ -1,6 +1,9 @@
 "use client";
 
-import { groupTracciabilitaByMateriale, lottoLabel } from "@/lib/tracciabilita-chain";
+import {
+  groupTracciabilitaByMateriale,
+  lottoLabel,
+} from "@/lib/tracciabilita-chain";
 import type { TracciabilitaRecord } from "@/types";
 
 type Props = {
@@ -53,8 +56,8 @@ export function TracciabilitaFlowChart({ rows, maxGroups = 8 }: Props) {
                 r.descrizioneComponente ??
                   r.descrizione_componente ??
                   r.posizione ??
-                  "—"
-              ).slice(0, 22)
+                  "—",
+              ).slice(0, 22),
             )
             .filter(Boolean);
           const compText = `${comp.slice(0, 3).join(" · ")}${comp.length > 3 ? "…" : ""}`;

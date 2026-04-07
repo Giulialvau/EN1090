@@ -1,4 +1,9 @@
-import { clearToken, getRefreshToken, getToken, setTokens } from "@/lib/auth-storage";
+import {
+  clearToken,
+  getRefreshToken,
+  getToken,
+  setTokens,
+} from "@/lib/auth-storage";
 
 function getApiBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -16,7 +21,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public body?: unknown
+    public body?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
@@ -31,7 +36,8 @@ function formatApiErrorMessage(parsed: unknown, fallback: string): string {
   }
   const m = (parsed as { message?: unknown }).message;
   if (typeof m === "string") return m;
-  if (Array.isArray(m)) return m.filter((x) => typeof x === "string").join(", ");
+  if (Array.isArray(m))
+    return m.filter((x) => typeof x === "string").join(", ");
   if (typeof m === "object" && m !== null && "message" in m) {
     const inner = (m as { message?: unknown }).message;
     if (typeof inner === "string") return inner;
@@ -57,7 +63,7 @@ function ensureRelativePath(path: string): string {
   if (!p) throw new Error("apiRequest path is empty");
   if (/^https?:\/\//i.test(p)) {
     throw new Error(
-      `apiRequest expected a relative path like "/commesse", got an absolute URL: ${p}`
+      `apiRequest expected a relative path like "/commesse", got an absolute URL: ${p}`,
     );
   }
   return p.startsWith("/") ? p : `/${p}`;
@@ -86,8 +92,7 @@ async function parseResponseBody(res: Response): Promise<unknown> {
   if (text === "") return null;
 
   const ct = res.headers.get("content-type") ?? "";
-  const contentTypeSuggestsJson =
-    /\bjson\b/i.test(ct) || /\+json/i.test(ct);
+  const contentTypeSuggestsJson = /\bjson\b/i.test(ct) || /\+json/i.test(ct);
 
   const trimmed = text.trimStart();
   const looksLikeJsonObjectOrArray =
@@ -134,7 +139,7 @@ async function refreshAccessToken(): Promise<boolean> {
 
 export async function apiRequest<T>(
   path: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { body, skipAuth, ...rest } = options;
   const relativePath = ensureRelativePath(path);
@@ -197,7 +202,7 @@ export function apiGet<T>(path: string, init?: RequestOptions): Promise<T> {
 export function apiPost<T = unknown>(
   path: string,
   body?: unknown,
-  init?: RequestOptions
+  init?: RequestOptions,
 ): Promise<T> {
   return apiRequest<T>(path, { ...init, method: "POST", body });
 }
@@ -205,7 +210,7 @@ export function apiPost<T = unknown>(
 export function apiPut<T = unknown>(
   path: string,
   body?: unknown,
-  init?: RequestOptions
+  init?: RequestOptions,
 ): Promise<T> {
   return apiRequest<T>(path, { ...init, method: "PUT", body });
 }
@@ -214,7 +219,7 @@ export function apiPut<T = unknown>(
 export function apiPatch<T = unknown>(
   path: string,
   body?: unknown,
-  init?: RequestOptions
+  init?: RequestOptions,
 ): Promise<T> {
   return apiRequest<T>(path, { ...init, method: "PATCH", body });
 }

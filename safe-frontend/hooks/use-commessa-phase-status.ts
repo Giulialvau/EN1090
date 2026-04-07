@@ -121,9 +121,7 @@ export function useCommessaPhaseStatus(commessaId: string | undefined) {
 
       const c = commessa;
       const overview = Boolean(
-        c &&
-          String(c.codice ?? "").trim() &&
-          String(c.cliente ?? "").trim()
+        c && String(c.codice ?? "").trim() && String(c.cliente ?? "").trim(),
       );
 
       const ncOpen = nc.filter((n) => ncAperta(n.stato));
@@ -165,7 +163,7 @@ export function useCommessaPhaseStatus(commessaId: string | undefined) {
       });
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore stato fasi commessa"
+        e instanceof ApiError ? e.message : "Errore stato fasi commessa",
       );
       setPhases(INITIAL_PHASES);
       setCounts(INITIAL_COUNTS);

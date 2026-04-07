@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-import { commesseApi, materialiApi, tracciabilitaApi } from "@/lib/api/endpoints";
+import {
+  commesseApi,
+  materialiApi,
+  tracciabilitaApi,
+} from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import type { Commessa, Materiale, TracciabilitaRecord } from "@/types";
 import Link from "next/link";
@@ -53,7 +57,7 @@ function TracciabilitaGlobalInner() {
       setRows(await tracciabilitaApi.byCommessa(cid));
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento tracciabilità"
+        e instanceof ApiError ? e.message : "Errore caricamento tracciabilità",
       );
     } finally {
       setLoading(false);
@@ -110,9 +114,7 @@ function TracciabilitaGlobalInner() {
       }
       const lot = filterLotto.trim().toLowerCase();
       if (lot) {
-        const l = String(
-          r.materiale?.lotto ?? r.lotto ?? ""
-        ).toLowerCase();
+        const l = String(r.materiale?.lotto ?? r.lotto ?? "").toLowerCase();
         if (!l.includes(lot)) return false;
       }
       return true;
@@ -159,7 +161,7 @@ function TracciabilitaGlobalInner() {
   async function removeRow(r: TracciabilitaRecord) {
     if (
       !window.confirm(
-        `Rimuovere il collegamento (pos. ${r.posizione ?? r.id})?`
+        `Rimuovere il collegamento (pos. ${r.posizione ?? r.id})?`,
       )
     )
       return;
@@ -169,13 +171,12 @@ function TracciabilitaGlobalInner() {
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
 
-  const initialCommessaForModal =
-    filterCommessa.trim() || urlCommessa || "";
+  const initialCommessaForModal = filterCommessa.trim() || urlCommessa || "";
 
   const hasCommessa = Boolean(filterCommessa.trim());
 

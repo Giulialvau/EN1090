@@ -19,7 +19,7 @@ export default function AttrezzaturePage() {
       setRows(await attrezzatureApi.list());
     } catch (e) {
       setError(
-        e instanceof ApiError ? e.message : "Errore caricamento attrezzature"
+        e instanceof ApiError ? e.message : "Errore caricamento attrezzature",
       );
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ export default function AttrezzaturePage() {
       render: (r) =>
         formatDate(
           (r.prossimaManutenzione as string | undefined) ??
-            (r.prossima_manutenzione as string | undefined)
+            (r.prossima_manutenzione as string | undefined),
         ),
     },
     {
@@ -50,7 +50,7 @@ export default function AttrezzaturePage() {
       render: (r) =>
         formatDate(
           (r.prossimaTaratura as string | undefined) ??
-            (r.prossima_taratura as string | undefined)
+            (r.prossima_taratura as string | undefined),
         ),
     },
   ];
@@ -61,9 +61,7 @@ export default function AttrezzaturePage() {
         title="Attrezzature"
         description="Macchinari, manutenzioni programmate, tarature e registrazioni obbligatorie"
       >
-        {error ? (
-          <p className="mb-4 text-sm text-red-600">{error}</p>
-        ) : null}
+        {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
         {loading ? (
           <p className="text-sm text-zinc-500">Caricamento…</p>
         ) : (

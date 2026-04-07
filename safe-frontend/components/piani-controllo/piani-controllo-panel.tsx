@@ -16,7 +16,11 @@ import { useCallback, useEffect, useState } from "react";
 
 type Scope = "commessa" | "global";
 
-type ControlloRow = { codice: string; descrizione: string; riferimentoNormativo: string };
+type ControlloRow = {
+  codice: string;
+  descrizione: string;
+  riferimentoNormativo: string;
+};
 
 type Props = {
   scope: Scope;
@@ -27,7 +31,8 @@ type Props = {
 };
 
 function parseControlli(raw: unknown): ControlloRow[] {
-  if (!Array.isArray(raw)) return [{ codice: "", descrizione: "", riferimentoNormativo: "" }];
+  if (!Array.isArray(raw))
+    return [{ codice: "", descrizione: "", riferimentoNormativo: "" }];
   return raw.map((x) => {
     const o = x as Record<string, unknown>;
     return {
@@ -87,9 +92,7 @@ export function PianiControlloPanel({
         setRows([]);
       }
     } catch (e) {
-      setError(
-        e instanceof ApiError ? e.message : "Errore caricamento piani"
-      );
+      setError(e instanceof ApiError ? e.message : "Errore caricamento piani");
     } finally {
       setLoading(false);
     }
@@ -121,7 +124,9 @@ export function PianiControlloPanel({
       fase: "",
       esito: "IN_ATTESA",
       commessaId: scope === "commessa" ? (commessaId ?? "") : "",
-      controlli: [{ codice: "PC-1", descrizione: "", riferimentoNormativo: "" }],
+      controlli: [
+        { codice: "PC-1", descrizione: "", riferimentoNormativo: "" },
+      ],
     });
     setModalOpen(true);
     setError(null);
@@ -143,7 +148,9 @@ export function PianiControlloPanel({
   function updateCtrl(i: number, patch: Partial<ControlloRow>) {
     setForm((f) => ({
       ...f,
-      controlli: f.controlli.map((row, j) => (j === i ? { ...row, ...patch } : row)),
+      controlli: f.controlli.map((row, j) =>
+        j === i ? { ...row, ...patch } : row,
+      ),
     }));
   }
 
@@ -152,7 +159,11 @@ export function PianiControlloPanel({
       ...f,
       controlli: [
         ...f.controlli,
-        { codice: `PC-${f.controlli.length + 1}`, descrizione: "", riferimentoNormativo: "" },
+        {
+          codice: `PC-${f.controlli.length + 1}`,
+          descrizione: "",
+          riferimentoNormativo: "",
+        },
       ],
     }));
   }
@@ -196,21 +207,16 @@ export function PianiControlloPanel({
         await pianiControlloApi.create(body);
       }
       setModalOpen(false);
-      if (
-        scope === "global" &&
-        applyUrlCommessaFilter &&
-        !urlFilter &&
-        cid
-      ) {
+      if (scope === "global" && applyUrlCommessaFilter && !urlFilter && cid) {
         router.replace(
-          `/piani-controllo?commessaId=${encodeURIComponent(cid)}`
+          `/piani-controllo?commessaId=${encodeURIComponent(cid)}`,
         );
       } else {
         await loadRows();
       }
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -225,7 +231,7 @@ export function PianiControlloPanel({
       await loadRows();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -443,9 +449,7 @@ export function PianiControlloPanel({
                 <Input
                   label="Codice"
                   value={c.codice}
-                  onChange={(e) =>
-                    updateCtrl(i, { codice: e.target.value })
-                  }
+                  onChange={(e) => updateCtrl(i, { codice: e.target.value })}
                 />
                 <Input
                   label="Descrizione"

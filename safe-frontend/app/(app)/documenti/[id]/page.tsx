@@ -10,10 +10,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-function classifyPreview(
-  blob: Blob,
-  nome: string
-): "pdf" | "image" | "other" {
+function classifyPreview(blob: Blob, nome: string): "pdf" | "image" | "other" {
   const t = blob.type;
   if (t === "application/pdf") return "pdf";
   if (t.startsWith("image/")) return "image";
@@ -32,7 +29,7 @@ export default function DocumentoDetailPage() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewKind, setPreviewKind] = useState<"pdf" | "image" | "other">(
-    "other"
+    "other",
   );
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewErr, setPreviewErr] = useState<string | null>(null);
@@ -73,7 +70,7 @@ export default function DocumentoDetailPage() {
       } catch (e) {
         if (!cancelled) {
           setPreviewErr(
-            e instanceof ApiError ? e.message : "Anteprima non disponibile"
+            e instanceof ApiError ? e.message : "Anteprima non disponibile",
           );
         }
       } finally {
@@ -101,7 +98,7 @@ export default function DocumentoDetailPage() {
       URL.revokeObjectURL(url);
     } catch (e) {
       setDownloadError(
-        e instanceof ApiError ? e.message : "Download non riuscito"
+        e instanceof ApiError ? e.message : "Download non riuscito",
       );
     } finally {
       setDownloading(false);
@@ -127,7 +124,9 @@ export default function DocumentoDetailPage() {
   }
 
   const cid = String(row.commessaId ?? row.commessa_id ?? "");
-  const comm = row.commessa as { codice?: string; cliente?: string } | undefined;
+  const comm = row.commessa as
+    | { codice?: string; cliente?: string }
+    | undefined;
 
   return (
     <div className="space-y-6">
@@ -143,9 +142,14 @@ export default function DocumentoDetailPage() {
         </h2>
       </div>
 
-      <Card title="Anteprima" description="PDF o immagine (download autenticato)">
+      <Card
+        title="Anteprima"
+        description="PDF o immagine (download autenticato)"
+      >
         {previewErr ? (
-          <p className="text-sm text-amber-700 dark:text-amber-400">{previewErr}</p>
+          <p className="text-sm text-amber-700 dark:text-amber-400">
+            {previewErr}
+          </p>
         ) : null}
         {previewLoading ? (
           <p className="text-sm text-zinc-500">Caricamento anteprima…</p>
@@ -174,32 +178,45 @@ export default function DocumentoDetailPage() {
       <Card title="Metadati" description="Dati esposti dall’API">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Tipo</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Tipo
+            </dt>
             <dd>{String(row.tipo ?? row.categoria ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Versione</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Versione
+            </dt>
             <dd>{String(row.versione ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Stato</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Stato
+            </dt>
             <dd>
               {String(
-                row.statoApprovazione ?? row.stato_approvazione ?? row.stato ?? "—"
+                row.statoApprovazione ??
+                  row.stato_approvazione ??
+                  row.stato ??
+                  "—",
               )}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Scadenza</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Scadenza
+            </dt>
             <dd>
               {formatDate(
                 (row.dataScadenza as string | undefined) ??
-                  (row.data_scadenza as string | undefined)
+                  (row.data_scadenza as string | undefined),
               )}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium uppercase text-zinc-500">Commessa</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Commessa
+            </dt>
             <dd>
               {cid ? (
                 <Link

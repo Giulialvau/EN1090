@@ -8,7 +8,11 @@ import { TracciabilitaTable } from "@/app/(app)/tracciabilita/components/traccia
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
-import { commesseApi, materialiApi, tracciabilitaApi } from "@/lib/api/endpoints";
+import {
+  commesseApi,
+  materialiApi,
+  tracciabilitaApi,
+} from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import type { Commessa, Materiale, TracciabilitaRecord } from "@/types";
 import Link from "next/link";
@@ -49,9 +53,7 @@ export default function TracciabilitaCommessaPage() {
       setMateriali(m);
       setRows(t);
     } catch (e) {
-      setError(
-        e instanceof ApiError ? e.message : "Errore caricamento dati"
-      );
+      setError(e instanceof ApiError ? e.message : "Errore caricamento dati");
       setCommessa(null);
     } finally {
       setLoading(false);
@@ -75,7 +77,7 @@ export default function TracciabilitaCommessaPage() {
   async function removeRow(r: TracciabilitaRecord) {
     if (
       !window.confirm(
-        `Rimuovere il collegamento (pos. ${r.posizione ?? r.id})?`
+        `Rimuovere il collegamento (pos. ${r.posizione ?? r.id})?`,
       )
     )
       return;
@@ -85,7 +87,7 @@ export default function TracciabilitaCommessaPage() {
       await load();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -117,7 +119,10 @@ export default function TracciabilitaCommessaPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm text-zinc-500">
-            <Link href="/tracciabilita" className="text-sky-700 hover:underline">
+            <Link
+              href="/tracciabilita"
+              className="text-sky-700 hover:underline"
+            >
               Tracciabilità
             </Link>{" "}
             /{" "}
@@ -133,7 +138,8 @@ export default function TracciabilitaCommessaPage() {
           </h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             {String(commessa.cliente ?? "")} — Collegamenti materiale (lotto) →
-            componente → posizione. I dati alimentano i PDF e il report commessa.
+            componente → posizione. I dati alimentano i PDF e il report
+            commessa.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -207,9 +213,7 @@ export default function TracciabilitaCommessaPage() {
 
       <Modal
         open={modalOpen}
-        title={
-          editing ? "Modifica collegamento" : "Nuovo collegamento"
-        }
+        title={editing ? "Modifica collegamento" : "Nuovo collegamento"}
         onClose={() => setModalOpen(false)}
       >
         <TracciabilitaForm

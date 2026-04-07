@@ -4,7 +4,11 @@ import { NcFormFields, emptyNcForm, type NcFormState } from "../form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { UploadDocument } from "@/components/ui/upload-document";
-import { commesseApi, documentiApi, nonConformitaApi } from "@/lib/api/endpoints";
+import {
+  commesseApi,
+  documentiApi,
+  nonConformitaApi,
+} from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { formatDate } from "@/lib/format";
 import type { Commessa, Documento, NonConformita } from "@/types";
@@ -65,11 +69,11 @@ export default function NcDetailPage() {
         azioniCorrettive: String(raw.azioniCorrettive ?? ""),
         dataApertura: formatDateIn(
           (raw.dataApertura as string | undefined) ??
-            (raw.data_apertura as string | undefined)
+            (raw.data_apertura as string | undefined),
         ),
         dataChiusura: formatDateIn(
           (raw.dataChiusura as string | undefined) ??
-            (raw.data_chiusura as string | undefined)
+            (raw.data_chiusura as string | undefined),
         ),
         commessaId: String(raw.commessaId ?? raw.commessa_id ?? ""),
       });
@@ -111,7 +115,7 @@ export default function NcDetailPage() {
       await load();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);
@@ -126,7 +130,7 @@ export default function NcDetailPage() {
       router.replace("/nc");
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Eliminazione non riuscita"
+        err instanceof ApiError ? err.message : "Eliminazione non riuscita",
       );
     }
   }
@@ -139,7 +143,10 @@ export default function NcDetailPage() {
     return (
       <Card title="Errore">
         <p className="text-sm text-red-600">{error}</p>
-        <Link href="/nc" className="mt-2 inline-block text-sm text-sky-700 hover:underline">
+        <Link
+          href="/nc"
+          className="mt-2 inline-block text-sm text-sky-700 hover:underline"
+        >
           Torna alla lista
         </Link>
       </Card>
@@ -177,7 +184,12 @@ export default function NcDetailPage() {
           ) : null}
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="ghost" className="text-red-700" onClick={() => void remove()}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-red-700"
+            onClick={() => void remove()}
+          >
             Elimina
           </Button>
         </div>
@@ -188,23 +200,31 @@ export default function NcDetailPage() {
       <Card title="Riepilogo" description="Stato e date">
         <dl className="grid gap-2 sm:grid-cols-2 text-sm">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Tipo</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Tipo
+            </dt>
             <dd>{String(row.tipo ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Gravità</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Gravità
+            </dt>
             <dd>{String(row.gravita ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Stato</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Stato
+            </dt>
             <dd>{String(row.stato ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Apertura</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Apertura
+            </dt>
             <dd>
               {formatDate(
                 (row.dataApertura as string | undefined) ??
-                  (row.data_apertura as string | undefined)
+                  (row.data_apertura as string | undefined),
               )}
             </dd>
           </div>
@@ -248,14 +268,17 @@ export default function NcDetailPage() {
           {docs.filter((d) => String(d.tipo ?? "") === "nc_allegato").length ===
           0 ? (
             <p className="mt-2 text-xs text-zinc-500">
-              Nessun documento con tipo nc_allegato. Dopo l&apos;upload comparirà
-              qui.
+              Nessun documento con tipo nc_allegato. Dopo l&apos;upload
+              comparirà qui.
             </p>
           ) : null}
         </Card>
       ) : null}
 
-      <Card title="Modifica" description="Salvataggio con PATCH /non-conformita/:id">
+      <Card
+        title="Modifica"
+        description="Salvataggio con PATCH /non-conformita/:id"
+      >
         <form className="space-y-4" onSubmit={save}>
           <NcFormFields
             form={form}

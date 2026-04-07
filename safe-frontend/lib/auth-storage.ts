@@ -39,7 +39,8 @@ export function clearToken(): void {
 export function subscribeAuth(cb: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   const onStorage = (e: StorageEvent) => {
-    if (e.key === TOKEN_KEY || e.key === REFRESH_TOKEN_KEY || e.key === null) cb();
+    if (e.key === TOKEN_KEY || e.key === REFRESH_TOKEN_KEY || e.key === null)
+      cb();
   };
   const onLocal = () => cb();
   window.addEventListener("storage", onStorage);

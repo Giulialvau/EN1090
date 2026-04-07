@@ -202,5 +202,5 @@ export const EN1090_NAV_SECTIONS: readonly En1090NavSection[] = [
 /** Lista piatta per compatibilità con codice esistente */
 export const APP_NAV: readonly { href: string; label: string }[] =
   EN1090_NAV_SECTIONS.flatMap((s) => s.items).filter(
-    (item, i, arr) => arr.findIndex((x) => x.href === item.href) === i
+    (item, i, arr) => arr.findIndex((x) => x.href === item.href) === i,
   );

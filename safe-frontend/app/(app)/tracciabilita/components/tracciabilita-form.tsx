@@ -76,10 +76,10 @@ export function TracciabilitaForm({
       posizione: String(editing.posizione ?? ""),
       quantita: formatQty(editing.quantita).replace("—", ""),
       descrizioneComponente: String(
-        editing.descrizioneComponente ?? editing.descrizione_componente ?? ""
+        editing.descrizioneComponente ?? editing.descrizione_componente ?? "",
       ),
       riferimentoDisegno: String(
-        editing.riferimentoDisegno ?? editing.riferimento_disegno ?? ""
+        editing.riferimentoDisegno ?? editing.riferimento_disegno ?? "",
       ),
       note: String(editing.note ?? ""),
     });
@@ -133,7 +133,7 @@ export function TracciabilitaForm({
       onSuccess();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Salvataggio non riuscito"
+        err instanceof ApiError ? err.message : "Salvataggio non riuscito",
       );
     } finally {
       setSaving(false);

@@ -24,9 +24,7 @@ export default function WpsDetailPage() {
     try {
       const w = await wpsApi.get(id);
       setRow(w ?? null);
-      const c = w
-        ? String(w.commessaId ?? w.commessa_id ?? "")
-        : "";
+      const c = w ? String(w.commessaId ?? w.commessa_id ?? "") : "";
       if (c) {
         try {
           setDocs(await documentiApi.byCommessa(c));
@@ -55,7 +53,10 @@ export default function WpsDetailPage() {
     return (
       <Card title="WPS">
         <p className="text-sm text-red-600">{error ?? "Non trovato"}</p>
-        <Link href="/wps" className="mt-2 inline-block text-sm text-sky-700 hover:underline">
+        <Link
+          href="/wps"
+          className="mt-2 inline-block text-sm text-sky-700 hover:underline"
+        >
           Torna alle WPS
         </Link>
       </Card>
@@ -80,7 +81,10 @@ export default function WpsDetailPage() {
         {cid ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Commessa:{" "}
-            <Link className="text-sky-700 hover:underline" href={`/commesse/${cid}`}>
+            <Link
+              className="text-sky-700 hover:underline"
+              href={`/commesse/${cid}`}
+            >
               {String(comm?.codice ?? cid)}
             </Link>
           </p>
@@ -90,29 +94,39 @@ export default function WpsDetailPage() {
       <Card title="Specifiche">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Processo</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Processo
+            </dt>
             <dd>{String(row.processo ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Spessore</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Spessore
+            </dt>
             <dd>{String(row.spessore ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Materiale base</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Materiale base
+            </dt>
             <dd>{String(row.materialeBase ?? "—")}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase text-zinc-500">Scadenza</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Scadenza
+            </dt>
             <dd>
               {formatDate(
                 (row.scadenza as string | undefined) ??
                   (row.dataScadenza as string | undefined) ??
-                  (row.data_scadenza as string | undefined)
+                  (row.data_scadenza as string | undefined),
               )}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium uppercase text-zinc-500">Note</dt>
+            <dt className="text-xs font-medium uppercase text-zinc-500">
+              Note
+            </dt>
             <dd className="whitespace-pre-wrap">{String(row.note ?? "—")}</dd>
           </div>
         </dl>

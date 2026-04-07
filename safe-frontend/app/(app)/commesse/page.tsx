@@ -33,7 +33,9 @@ const EMPTY_FILTERS: CommesseListParams = {
   dataInizioA: "",
 };
 
-function buildListParams(f: CommesseListParams): CommesseListParams | undefined {
+function buildListParams(
+  f: CommesseListParams,
+): CommesseListParams | undefined {
   const params: CommesseListParams = {};
   if (f.stato) params.stato = f.stato;
   if (f.cliente?.trim()) params.cliente = f.cliente.trim();
@@ -52,7 +54,9 @@ export default function CommessePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const [filters, setFilters] = useState<CommesseListParams>({ ...EMPTY_FILTERS });
+  const [filters, setFilters] = useState<CommesseListParams>({
+    ...EMPTY_FILTERS,
+  });
 
   const [search, setSearch] = useState("");
 
@@ -128,7 +132,11 @@ export default function CommessePage() {
         </span>
       ),
     },
-    { key: "cliente", header: "Cliente", render: (r) => String(r.cliente ?? "—") },
+    {
+      key: "cliente",
+      header: "Cliente",
+      render: (r) => String(r.cliente ?? "—"),
+    },
     {
       key: "data",
       header: "Data",
@@ -175,7 +183,7 @@ export default function CommessePage() {
       setSaveError(
         err instanceof ApiError
           ? err.message
-          : "Creazione commessa non riuscita"
+          : "Creazione commessa non riuscita",
       );
     } finally {
       setCreating(false);
@@ -321,9 +329,15 @@ export default function CommessePage() {
           </>
         }
       >
-        <form id="form-commessa" className="space-y-3" onSubmit={createCommessa}>
+        <form
+          id="form-commessa"
+          className="space-y-3"
+          onSubmit={createCommessa}
+        >
           {saveError ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {saveError}
+            </p>
           ) : null}
           <CommessaFormFields form={form} setForm={setForm} showStato />
         </form>

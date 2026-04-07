@@ -119,7 +119,7 @@ export function NonConformitaPanel({
       tipo: String(r.tipo ?? "INTERNA"),
       gravita: String(r.gravita ?? "MEDIA"),
       stato: String(r.stato ?? "APERTA"),
-      azioniCorrettive: String(r.azioniCorrettive ?? ""),
+      azioniCorrettive: String(r.azioniCorrettive ?? r.azione ?? ""),
       dataApertura: formatDateIn(
         (r.dataApertura as string | undefined) ??
           (r.data_apertura as string | undefined),
@@ -156,7 +156,7 @@ export function NonConformitaPanel({
         tipo: form.tipo,
         gravita: form.gravita,
         stato: form.stato,
-        azioniCorrettive: form.azioniCorrettive.trim() || undefined,
+        azione: form.azioniCorrettive.trim() || undefined,
         dataApertura: form.dataApertura
           ? new Date(form.dataApertura).toISOString()
           : undefined,

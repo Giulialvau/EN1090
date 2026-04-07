@@ -145,6 +145,10 @@ export function AuditPanel({
       setError("Titolo, auditor e data sono obbligatori.");
       return;
     }
+    if (!form.note.trim()) {
+      setError("Le note audit sono obbligatorie.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -11,6 +11,11 @@ export class NonConformitaService {
 
   async create(dto: CreateNonConformitaDto) {
     await this.ensureCommessa(dto.commessaId);
+    if (dto.stato === "CHIUSA" && !dto.azione?.trim()) {
+      throw new BadRequestException(
+        "Per chiudere una non conformita e obbligatoria l'azione correttiva.",
+      );
+    }
     return this.prisma.nonConformita.create({
       data: {
         commessa: { connect: { id: dto.commessaId } },
@@ -60,7 +65,12 @@ export class NonConformitaService {
   }
 
   async update(id: number, dto: UpdateNonConformitaDto) {
-    await this.ensureExists(id);
+    const current = await this.ensureExists(id);
+    if ((dto.stato ?? current.stato) === "CHIUSA" && !(dto.azione ?? current.azione)?.trim()) {
+      throw new BadRequestException(
+        "Per chiudere una non conformita e obbligatoria l'azione correttiva.",
+      );
+    }
     if (dto.commessaId) {
       await this.ensureCommessa(dto.commessaId);
     }
@@ -99,10 +109,11 @@ export class NonConformitaService {
     }
   }
 
-  private async ensureExists(id: number): Promise<void> {
+  private async ensureExists(id: number) {
     const x = await this.prisma.nonConformita.findUnique({ where: { id } });
     if (!x) {
       throw new NotFoundException(`Non conformità ${id} non trovata`);
     }
+    return x;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "../prisma/prisma.service";
@@ -16,6 +16,7 @@ export class ChecklistService {
 
   async create(dto: CreateChecklistDto) {
     await this.ensureCommessa(dto.commessaId);
+    this.validateChecklistRules(dto.stato, dto.esito, dto.fase, dto.note, dto.allegati);
     const elementi = dto.elementi ?? [];
     return this.prisma.checklist.create({
       data: {
@@ -66,10 +67,17 @@ export class ChecklistService {
   }
 
   async update(id: number, dto: UpdateChecklistDto) {
-    await this.ensureExists(id);
+    const current = await this.ensureExists(id);
     if (dto.commessaId) {
       await this.ensureCommessa(dto.commessaId);
     }
+    this.validateChecklistRules(
+      dto.stato ?? current.stato,
+      dto.esito ?? current.esito ?? undefined,
+      dto.fase ?? current.fase ?? undefined,
+      dto.note ?? current.note ?? undefined,
+      dto.allegati !== undefined ? dto.allegati : current.allegati,
+    );
     const data: Prisma.ChecklistUpdateInput = {
       titolo: dto.titolo,
       categoria: dto.categoria,
@@ -112,10 +120,40 @@ export class ChecklistService {
     }
   }
 
-  private async ensureExists(id: number): Promise<void> {
+  private async ensureExists(id: number) {
     const x = await this.prisma.checklist.findUnique({ where: { id } });
     if (!x) {
       throw new NotFoundException(`Checklist ${id} non trovata`);
+    }
+    return x;
+  }
+
+  private validateChecklistRules(
+    stato: string,
+    esito: string | undefined,
+    fase: string | undefined,
+    note: string | undefined,
+    allegati: unknown,
+  ): void {
+    if (!fase?.trim()) {
+      throw new BadRequestException("Il campo fase e obbligatorio.");
+    }
+    if (stato === "COMPLETATA") {
+      if (!esito) {
+        throw new BadRequestException(
+          "Non puoi completare la checklist senza esito.",
+        );
+      }
+      if (!note?.trim()) {
+        throw new BadRequestException(
+          "Per checklist completata le note sono obbligatorie.",
+        );
+      }
+      if (!Array.isArray(allegati) || allegati.length === 0) {
+        throw new BadRequestException(
+          "Per checklist completata serve almeno un allegato.",
+        );
+      }
     }
   }
 }

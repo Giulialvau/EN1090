@@ -39,6 +39,7 @@ export class WpqrService {
         );
       }
     }
+    this.validateDateRange(dto.dataQualifica, dto.scadenza);
     return this.prisma.wpqr.create({
       data: {
         codice: dto.codice,
@@ -86,6 +87,10 @@ export class WpqrService {
       throw new NotFoundException(`WPQR ${id} non trovato`);
     }
     const nextWpsId = dto.wpsId ?? current.wpsId;
+    this.validateDateRange(
+      dto.dataQualifica ?? current.dataQualifica,
+      dto.scadenza !== undefined ? dto.scadenza : current.scadenza ?? undefined,
+    );
     const nextCommessa =
       dto.commessaId !== undefined ? dto.commessaId : current.commessaId;
     if (dto.wpsId) {
@@ -153,6 +158,14 @@ export class WpqrService {
     const x = await this.prisma.wpqr.findUnique({ where: { id } });
     if (!x) {
       throw new NotFoundException(`WPQR ${id} non trovato`);
+    }
+  }
+
+  private validateDateRange(dataQualifica: Date, scadenza?: Date): void {
+    if (scadenza && scadenza <= dataQualifica) {
+      throw new BadRequestException(
+        "La scadenza WPQR deve essere successiva alla data di qualifica.",
+      );
     }
   }
 }

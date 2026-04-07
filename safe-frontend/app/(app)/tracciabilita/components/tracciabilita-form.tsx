@@ -112,6 +112,10 @@ export function TracciabilitaForm({
       setError("Indica la posizione o il riferimento di installazione.");
       return;
     }
+    if (!form.riferimentoDisegno.trim()) {
+      setError("Il riferimento disegno e obbligatorio.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -233,13 +237,14 @@ export function TracciabilitaForm({
         placeholder="Collegamento lotto → componente prodotto"
       />
       <Input
-        label="Riferimento disegno"
+        label="Riferimento disegno *"
         name="riferimentoDisegno"
         value={form.riferimentoDisegno}
         onChange={(e) =>
           setForm((f) => ({ ...f, riferimentoDisegno: e.target.value }))
         }
         placeholder="es. DWG-2025-118 rev.B"
+        required
       />
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">

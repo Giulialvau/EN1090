@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -11,6 +11,9 @@ export class AuditService {
 
   async create(dto: CreateAuditDto) {
     await this.ensureCommessa(dto.commessaId);
+    if (!dto.note?.trim()) {
+      throw new BadRequestException("Le note audit sono obbligatorie.");
+    }
     return this.prisma.audit.create({
       data: {
         commessaId: dto.commessaId,
@@ -55,7 +58,10 @@ export class AuditService {
   }
 
   async update(id: number, dto: UpdateAuditDto) {
-    await this.ensureExists(id);
+    const current = await this.ensureExists(id);
+    if (!((dto.note ?? current.note)?.trim())) {
+      throw new BadRequestException("Le note audit sono obbligatorie.");
+    }
     if (dto.commessaId) {
       await this.ensureCommessa(dto.commessaId);
     }
@@ -85,10 +91,11 @@ export class AuditService {
     }
   }
 
-  private async ensureExists(id: number): Promise<void> {
+  private async ensureExists(id: number) {
     const a = await this.prisma.audit.findUnique({ where: { id } });
     if (!a) {
       throw new NotFoundException(`Audit ${id} non trovato`);
     }
+    return a;
   }
 }

@@ -28,6 +28,11 @@ export class TracciabilitaService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateTracciabilitaDto) {
+    if (!dto.riferimentoDisegno?.trim()) {
+      throw new BadRequestException(
+        "Il riferimento disegno e obbligatorio per la tracciabilita.",
+      );
+    }
     await this.ensureMaterialeCommessaCoherent(dto.materialeId, dto.commessaId);
     return this.prisma.tracciabilita.create({
       data: {
@@ -86,6 +91,11 @@ export class TracciabilitaService {
         cid ?? current.commessaId,
       );
     }
+    if (dto.riferimentoDisegno !== undefined && !dto.riferimentoDisegno.trim()) {
+      throw new BadRequestException(
+        "Il riferimento disegno non puo essere vuoto.",
+      );
+    }
     const data: Prisma.TracciabilitaUpdateInput = {
       posizione: dto.posizione,
       descrizioneComponente: dto.descrizioneComponente,
@@ -142,6 +152,11 @@ export class TracciabilitaService {
     if (m.commessaId !== commessaId) {
       throw new BadRequestException(
         "Il materiale non appartiene alla commessa indicata: tracciabilità incoerente",
+      );
+    }
+    if (!m.lotto?.trim() || !m.norma?.trim() || (!m.certificato31?.trim() && !m.certificatoDocumentoId)) {
+      throw new BadRequestException(
+        "Materiale non qualificato: servono lotto, norma e certificato 3.1 (testo o PDF).",
       );
     }
   }

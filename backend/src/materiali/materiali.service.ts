@@ -10,6 +10,10 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateMaterialeDto } from "./dto/create-materiale.dto";
 import { UpdateMaterialeDto } from "./dto/update-materiale.dto";
 
+const STEEL_NORMA = ["EN 10025", "EN10025", "EN 10210", "EN10210", "EN 10219", "EN10219"];
+const INOX_NORMA = ["EN 10088", "EN10088"];
+const ALU_NORMA = ["EN 573", "EN573", "EN 485", "EN485", "EN 755", "EN755"];
+
 const materialeInclude = {
   commessa: { select: { id: true, codice: true, cliente: true } },
   certificatoDocumento: {
@@ -28,6 +32,8 @@ export class MaterialiService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateMaterialeDto) {
+    this.validateNormaByTipo(dto.tipo, dto.norma);
+    this.validateRequiredMaterialeFields(dto.lotto, dto.fornitore, dto.certificato31, dto.certificatoDocumentoId);
     await this.ensureCommessa(dto.commessaId);
     await this.validateCertificatoDocumento(
       dto.commessaId,
@@ -102,6 +108,17 @@ export class MaterialiService {
     }
 
     const targetCommessaId = dto.commessaId ?? current.commessaId;
+    const nextTipo = dto.tipo ?? current.tipo ?? undefined;
+    const nextNorma = dto.norma ?? current.norma ?? undefined;
+    const nextLotto = dto.lotto ?? current.lotto ?? undefined;
+    const nextFornitore = dto.fornitore ?? current.fornitore ?? undefined;
+    const nextCert31 = dto.certificato31 ?? current.certificato31 ?? undefined;
+    const nextCertDocId =
+      dto.certificatoDocumentoId !== undefined
+        ? dto.certificatoDocumentoId
+        : current.certificatoDocumentoId;
+    this.validateNormaByTipo(nextTipo, nextNorma);
+    this.validateRequiredMaterialeFields(nextLotto, nextFornitore, nextCert31, nextCertDocId);
     const prevCertId = current.certificatoDocumentoId;
     await this.validateCertificatoDocumento(
       targetCommessaId,
@@ -166,8 +183,76 @@ export class MaterialiService {
 
   async remove(id: number) {
     await this.ensureExists(id);
+    const inUse = await this.prisma.tracciabilita.findFirst({
+      where: { materialeId: id },
+      select: { id: true },
+    });
+    if (inUse) {
+      throw new BadRequestException(
+        "Impossibile eliminare il materiale: e collegato a record di tracciabilita.",
+      );
+    }
     await this.prisma.materiale.delete({ where: { id } });
     return { deleted: true, id };
+  }
+
+  private validateRequiredMaterialeFields(
+    lotto: string | undefined | null,
+    fornitore: string | undefined | null,
+    certificato31: string | undefined | null,
+    certificatoDocumentoId: number | undefined | null,
+  ): void {
+    if (!lotto?.trim()) {
+      throw new BadRequestException("Il campo lotto e obbligatorio.");
+    }
+    if (!fornitore?.trim()) {
+      throw new BadRequestException("Il campo fornitore e obbligatorio.");
+    }
+    if (!certificato31?.trim() && !certificatoDocumentoId) {
+      throw new BadRequestException(
+        "Il materiale deve avere un certificato 3.1 testuale o un PDF collegato.",
+      );
+    }
+  }
+
+  private validateNormaByTipo(
+    tipo: string | undefined,
+    norma: string | undefined,
+  ): void {
+    if (!tipo?.trim() || !norma?.trim()) {
+      throw new BadRequestException(
+        "I campi tipo e norma sono obbligatori per qualificare il materiale.",
+      );
+    }
+    const t = tipo.trim().toLowerCase();
+    const n = norma.trim().toUpperCase();
+    if (t === "acciaio") {
+      if (!STEEL_NORMA.some((x) => n.startsWith(x))) {
+        throw new BadRequestException(
+          "Per tipo acciaio la norma deve essere EN 10025, EN 10210 o EN 10219.",
+        );
+      }
+      return;
+    }
+    if (t === "inox") {
+      if (!INOX_NORMA.some((x) => n.startsWith(x))) {
+        throw new BadRequestException(
+          "Per tipo inox la norma deve essere EN 10088-x.",
+        );
+      }
+      return;
+    }
+    if (t === "alluminio") {
+      if (!ALU_NORMA.some((x) => n.startsWith(x))) {
+        throw new BadRequestException(
+          "Per tipo alluminio la norma deve essere EN 573, EN 485 o EN 755.",
+        );
+      }
+      return;
+    }
+    throw new BadRequestException(
+      "Il campo tipo deve essere uno tra: acciaio, inox, alluminio.",
+    );
   }
 
   private async validateCertificatoDocumento(
